@@ -1,0 +1,20 @@
+
+Review Count Statistics:
+Total restaurants: 5854
+Average reviews per restaurant: 113.8
+Median reviews per restaurant: 39.0
+Maximum reviews: 5721
+Minimum reviews: 5
+
+Top 10 Most Reviewed Restaurants:
+Reading Terminal Market: 5721 reviews
+Pat's King of Steaks: 4250 reviews
+Geno's Steaks: 3401 reviews
+El Vez: 3187 reviews
+Zahav: 3065 reviews
+Barbuzzo: 2893 reviews
+Parc: 2761 reviews
+Jim's South St: 2736 reviews
+Dalessandro’s Steaks & Hoagies: 2686 reviews
+Green Eggs Café: 2679 reviews
+(qpp_repo) PS C:\Users\cuiju\OneDrive - University of Toronto\yelp>

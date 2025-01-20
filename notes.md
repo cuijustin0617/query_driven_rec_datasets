@@ -1,0 +1,3 @@
+- things to look out for:
+    - super short reviews
+    - restaurants with small number of reviews

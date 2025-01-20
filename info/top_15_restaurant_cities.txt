@@ -1,0 +1,15 @@
+Philadelphia: 5852 restaurants
+Tampa: 2960 restaurants
+Indianapolis: 2862 restaurants
+Nashville: 2502 restaurants
+Tucson: 2466 restaurants
+New Orleans: 2259 restaurants
+Edmonton: 2166 restaurants
+Saint Louis: 1790 restaurants
+Reno: 1286 restaurants
+Boise: 847 restaurants
+Santa Barbara: 767 restaurants
+Clearwater: 678 restaurants
+Wilmington: 619 restaurants
+St. Louis: 543 restaurants
+Metairie: 522 restaurants
