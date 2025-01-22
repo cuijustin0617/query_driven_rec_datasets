@@ -30,7 +30,7 @@ def generate_structured_json():
                     query_restaurants[query].append(restaurant_name)
     
     # Write the structured JSON file
-    output_path = 'restaurant_queries.json'
+    output_path = 'restaurant_queries_70.json'
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(query_restaurants, f, indent=2)
     
