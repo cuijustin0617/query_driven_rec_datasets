@@ -19,14 +19,17 @@ def process_restaurant(doc_path, queries_path, client):
     queries = read_file_content(queries_path).strip().split('\n')
     
     # Prepare output path
-    judgements_dir = Path('judgements_70')
+    judgements_dir = Path('judgements_2k')
     judgements_dir.mkdir(exist_ok=True)
     output_path = judgements_dir / f"{restaurant_name}.csv"
     
     results = []
     
     # Process each query
+    i=0
     for query in queries:
+        i+=1
+        print("processing query", i)
         prompt = f"""Given the following restaurant information:
 {restaurant_content}
 
@@ -34,7 +37,7 @@ Query: {query}
 
 Is this query relevant to the restaurant information provided? 
 Answer with just 'True' if relevant, 'False' if not relevant."""
-
+        print("waiting for response")
         response = client.chat.completions.create(
             model="deepseek-chat",
             messages=[
@@ -43,6 +46,7 @@ Answer with just 'True' if relevant, 'False' if not relevant."""
             ],
             stream=False
         )
+        print("response received")
         
         relevance = response.choices[0].message.content.strip()
         results.append([query, relevance])
@@ -57,12 +61,12 @@ Answer with just 'True' if relevant, 'False' if not relevant."""
 
 def main():
     client = OpenAI(api_key=os.getenv("DEEPSEEK_API_KEY"), base_url="https://api.deepseek.com")
-    docs_dir = Path('docs_70')
+    docs_dir = Path('docs_2k_2')
     queries_path = 'queries.txt'
     
     # Process each restaurant document
     for doc_path in docs_dir.glob('*.txt'):
-        output_path = Path('judgements_70') / f"{doc_path.stem}.csv"
+        output_path = Path('judgements_2k') / f"{doc_path.stem}.csv"
         if not output_path.exists():
             process_restaurant(doc_path, queries_path, client)
         else:
