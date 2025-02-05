@@ -8,9 +8,10 @@ def generate_structured_json():
     query_restaurants = {}
     
     # Get all CSV files in the judgements directory
-    judgements_dir = Path('all_judgements')
+    judgements_dir = Path('Philadelphia/judgements_multi')  ################TO CHANGE
     csv_files = list(judgements_dir.glob('*.csv'))
     
+
     # Process each CSV file
     for csv_path in csv_files:
         restaurant_name = csv_path.stem  # Get filename without extension
@@ -30,7 +31,7 @@ def generate_structured_json():
                     query_restaurants[query].append(restaurant_name)
     
     # Write the structured JSON file
-    output_path = 'ground_truth_2k.json'
+    output_path = 'Philadelphia/ground_truth_multi.json'  ################TO CHANGE
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(query_restaurants, f, indent=2)
     

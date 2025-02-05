@@ -16,4 +16,4 @@ def filter_high_reviews(input_file, output_file, min_reviews=50):
                 writer.writerow(row)
 
 # Usage
-filter_high_reviews('philadelphia_restaurants.csv', 'philadelphia_restaurants_filtered.csv')
+filter_high_reviews('data/new_orleans/new_orleans_restaurants.csv', 'data/new_orleans/over50_new_orleans_restaurants.csv')

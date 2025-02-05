@@ -1,19 +1,20 @@
 import pandas as pd
 
 # Read the data (adjust the file path as needed)
-df = pd.read_json('yelp_academic_dataset_business.json', lines=True)
+df = pd.read_json('original/yelp_academic_dataset_business.json', lines=True)
 
-# Filter for Philadelphia restaurants
-philly_restaurants = df[
-    (df['city'].str.lower() == 'philadelphia') & 
+# Filter for New Orleans restaurants
+restaurants = df[
+    (df['city'].str.lower() == 'new orleans') & 
     (df['categories'].str.contains('Restaurants', case=False, na=False))
 ]
 
 # Get the count
-total_count = len(philly_restaurants)
+total_count = len(restaurants)
 
 # Print results
-print(f"Total Philadelphia restaurants found: {total_count}")
+print(f"Total New Orleans restaurants found: {total_count}")
 
 # Optionally save the filtered data
-philly_restaurants.to_csv('philadelphia_restaurants.csv', index=False)
+restaurants.to_csv('new_orleans_restaurants.csv', index=False)
+

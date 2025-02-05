@@ -19,7 +19,7 @@ def process_restaurant(doc_path, queries_path, client):
     queries = read_file_content(queries_path).strip().split('\n')
     
     # Prepare output path
-    judgements_dir = Path('judgements_2k')
+    judgements_dir = Path('New_Orleans/judgements')
     judgements_dir.mkdir(exist_ok=True)
     output_path = judgements_dir / f"{restaurant_name}.csv"
     
@@ -60,13 +60,13 @@ Answer with just 'True' if relevant, 'False' if not relevant."""
     print(f"Processed {restaurant_name}: Results saved to {output_path}")
 
 def main():
-    client = OpenAI(api_key=os.getenv("DEEPSEEK_API_KEY"), base_url="https://api.deepseek.com")
-    docs_dir = Path('docs_2k_2')
+    client = OpenAI(api_key=os.getenv("DEEPSEEK_API_KEY_0617"), base_url="https://api.deepseek.com")
+    docs_dir = Path('New_Orleans/docs')
     queries_path = 'queries.txt'
     
     # Process each restaurant document
     for doc_path in docs_dir.glob('*.txt'):
-        output_path = Path('judgements_2k') / f"{doc_path.stem}.csv"
+        output_path = Path('New_Orleans/judgements') / f"{doc_path.stem}.csv"
         if not output_path.exists():
             process_restaurant(doc_path, queries_path, client)
         else:
