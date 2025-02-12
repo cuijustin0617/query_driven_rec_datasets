@@ -3,6 +3,7 @@ import csv
 from openai import OpenAI
 from pathlib import Path
 from dotenv import load_dotenv
+import time
 
 load_dotenv()
 
@@ -39,16 +40,25 @@ Respond with ONLY the numbered True/False values, no other text."""
 
     print("Waiting for response...")
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini-2024-07-18",  ################TO CHANGE
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant that determines if queries are relevant to restaurant information."},
-            {"role": "user", "content": prompt},
-        ],
-        stream=False
-    )
-    print("Response received")
-    
+    # Keep trying until successful
+    attempt = 1
+    while True:
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o-mini-2024-07-18",  ################TO CHANGE
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant that determines if queries are relevant to restaurant information."},
+                    {"role": "user", "content": prompt},
+                ],
+                stream=False
+            )
+            print("Response received")
+            break  # If successful, exit the retry loop
+        except Exception as e:
+            print(f"Attempt {attempt} failed: {str(e)}. Retrying in 10 seconds...")
+            time.sleep(10)
+            attempt += 1
+
     # Parse response
     response_lines = response.choices[0].message.content.strip().split('\n')
     results = []
@@ -68,11 +78,16 @@ Respond with ONLY the numbered True/False values, no other text."""
 
 def main():
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY_eqr"))  ################TO CHANGE
-    docs_dir = Path('Philadelphia/docs_100')   ################TO CHANGE
-    queries_path = 'queries_multi.txt'  ################TO CHANGE
-    output_folder = Path('Philadelphia/judgements_multi')  ################TO CHANGE
-
     
+    # Directory containing restaurant text documents to process
+    docs_dir = Path('Philadelphia/docs_2k')   ################TO CHANGE
+    
+    # txt file containing the queries to evaluate against each restaurant -- one query per line
+    queries_path = 'queries_multi.txt'  ################TO CHANGE
+    
+    # Output directory for storing relevance judgement CSV files, one csv per restaurant
+    output_folder = Path('Philadelphia/judgements_multi_2k')  ################TO CHANGE
+
 
 
     # Process each restaurant document
