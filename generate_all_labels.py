@@ -80,13 +80,13 @@ def main():
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY_eqr"))  ################TO CHANGE
     
     # Directory containing restaurant text documents to process
-    docs_dir = Path('Philadelphia/docs_2k')   ################TO CHANGE
+    docs_dir = Path('New_Orleans/new_orleans_1k')   ################TO CHANGE
     
     # txt file containing the queries to evaluate against each restaurant -- one query per line
     queries_path = 'queries_multi.txt'  ################TO CHANGE
     
     # Output directory for storing relevance judgement CSV files, one csv per restaurant
-    output_folder = Path('Philadelphia/judgements_multi_2k')  ################TO CHANGE
+    output_folder = Path('New_Orleans/judgements_multi_1k')  ################TO CHANGE
 
 
 
