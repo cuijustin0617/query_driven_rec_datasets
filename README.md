@@ -6,7 +6,7 @@ This pipeline provides a more sophisticated approach to generating relevance jud
 
 ### Pipeline Components
 
-1. **DocumentSummarizer**: Generates query-specific summaries for each restaurant document
+1. **DocumentSummarizer**: Given a query, generates query-specific summaries for each restaurant document
 
 2. **RelevanceJudge**: Determines which restaurants are relevant to a specific query
 
@@ -42,14 +42,6 @@ Edit the `per_query_labeling/config.py` file to set up your:
 - LLM provider and model settings
 
 ### Running the Pipeline
-
-**Prerequisites**:
-
-- Restaurant documents in a folder configured in `config.py` (e.g., `data/docs/philadelphia/docs_100/`)
-
-- Query file configured in `config.py` (e.g., `queries/queries_toy.txt`)
-
-- LLM provider configuration in `config.py`
 
 Run the main script to execute the pipeline:
 ```python -m per_query_labeling.main```
