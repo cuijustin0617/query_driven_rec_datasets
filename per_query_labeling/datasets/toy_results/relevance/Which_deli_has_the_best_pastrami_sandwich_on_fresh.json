@@ -1,0 +1,10 @@
+{
+  "query": "Which deli has the best pastrami sandwich on fresh rye bread with spicy mustard?",
+  "relevant_restaurants": [
+    "Citi Market place",
+    "NY Bagel Cafe & Deli",
+    "Ricci's Hoagies",
+    "The Coventry Deli",
+    "Wawa"
+  ]
+}
