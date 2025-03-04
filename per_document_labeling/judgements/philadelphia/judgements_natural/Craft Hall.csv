@@ -1,0 +1,21 @@
+Query,Relevant
+"""I’m craving something sweet after dinner—any suggestions for a dessert spot that’s open late?""",False
+"""Where can I grab a quick lunch that won’t feel like junk food but still tastes amazing?""",False
+"""I want to celebrate my anniversary somewhere romantic but not super expensive—ideas?""",False
+"""I need a good weekend brunch place that won’t keep us waiting forever but still has fancy mimosas.""",True
+"""Looking for a cozy café to get some work done while enjoying a great latte and maybe a pastry.""",False
+"""I want to impress out-of-town guests with local flavors—any hidden gems around?""",False
+"""Which spot has a solid happy hour that won’t break the bank but still has tasty appetizers?""",True
+"""I’m in the mood for something spicy, but my friend prefers mild—any flexible menu recommendations?""",False
+"""We need a place for a big family dinner with vegan and meat options so everyone’s happy.""",True
+"""I need a breakfast place that opens super early and has more than just standard eggs and bacon.""",False
+"""Looking for a fun spot to hang out with friends where we can also snack on shareable plates.""",True
+"""Any suggestions for a BYOB restaurant with a chill vibe and good vegetarian dishes?""",False
+"""I’m trying to eat healthier—where can I find a place with low-calorie but flavorful menu options?""",False
+"""Any recommendations for a late-night eatery that serves comfort food without a huge wait?""",False
+"""My partner’s a picky eater—need a place with simple dishes but also chef’s specials for me to explore.""",False
+"""I want something light yet filling for lunch—maybe a hearty salad or grain bowl?""",False
+"""Which spots offer a great outdoor patio experience for dinner, preferably with heat lamps?""",True
+"""I’m on a budget this month—where can I get a solid meal deal that won’t taste cheap?""",False
+"""Looking for a kid-friendly restaurant that isn’t a chain and has a decent craft beer selection for adults.""",True
+"""I’m in the mood for a unique date-night place with tasty cocktails and a cool atmosphere.""",False
