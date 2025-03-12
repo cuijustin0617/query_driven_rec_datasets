@@ -1,4 +1,5 @@
 import os
+import shutil
 from pathlib import Path
 import time
 
@@ -7,8 +8,30 @@ from per_query_labeling.pipeline.pipeline import RelevancePipeline
 from per_query_labeling.models.llm_client import LLMClient
 
 
+def save_config_to_output_dir():
+    """Save the current config file to the output directory."""
+    # Get the config file path
+    current_dir = Path(__file__).parent
+    config_path = current_dir / "config.py"
+    
+    # Check if config file exists
+    if not config_path.exists():
+        print(f"Warning: Config file not found at {config_path}")
+        return
+    
+    # Create destination path
+    dest_path = Path(OUTPUT_DIR) / "config.py"
+    
+    # Copy the file
+    shutil.copy2(config_path, dest_path)
+    print(f"Config file saved to {dest_path}")
+
+
 def main():
     Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
+    
+    # Save config file to output directory
+    save_config_to_output_dir()
 
     # Start time
     start_time = time.time()

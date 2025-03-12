@@ -7,7 +7,7 @@ from tqdm import tqdm
 from ..models.llm_client import LLMClient
 from ..data.document_processor import read_document
 from ..prompts.summary_prompt import get_summary_prompt
-from ..config import SUMMARIES_DIR
+from ..config import SUMMARIES_DIR, DOMAIN
 
 class DocumentSummarizer:
     """ Summarize documents with respect to queries"""
@@ -22,11 +22,11 @@ class DocumentSummarizer:
         prompt = get_summary_prompt(document_content, query)
 
         messages = [
-            {"role": "system", "content": "You are a helpful assistant that summarizes restaurant information."},
+            {"role": "system", "content": f"You are a helpful assistant that summarizes {DOMAIN} information."},
             {"role": "user", "content": prompt},
         ]
         response = self.llm_client.get_completion(messages)
-        print(f"sumamry of {document_path}: {response}")
+        print(f"summary of {document_path}: {response}")
         return response
     
     def process_query(self, query: str, documents: List[Tuple[str, Path]]) -> Dict[str, str]:
@@ -35,16 +35,17 @@ class DocumentSummarizer:
         
         Args:
             query: The query to process
-            documents: List of (restaurant_name, document_path) tuples
+            documents: List of (item name, document_path) tuples
             
         Returns:
-            Dict[str, str]: Dictionary mapping restaurant names to summaries
+            Dict[str, str]: Dictionary mapping item names to summaries
         """
         query_id = query.replace(" ", "_")[:50]
         output_path = Path(SUMMARIES_DIR) / f"{query_id}.csv"
 
         #check if already processed
         if output_path.exists():
+            print(f"Skipping query: {query} because it ALREADY exists")
             #load existing summaries
             summaries = {}
             with open(output_path, 'r', encoding='utf-8') as f:
@@ -59,17 +60,18 @@ class DocumentSummarizer:
         print(f"Processing query: {query}")
 
         with tqdm(total=len(documents), desc="Generating summaries") as pbar:
-            for restaurant_name, doc_path in documents:
+
+            for item_name, doc_path in documents:
                 summary = self.summarize_document(doc_path, query)
-                summaries[restaurant_name] = summary
+                summaries[item_name] = summary
                 pbar.update(1)
         
         #save summaries
         with open(output_path, 'w', encoding='utf-8', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow(["Restaurant", "Summary"])
-            for restaurant_name, summary in sorted(summaries.items()):
-                writer.writerow([restaurant_name, summary])
+            writer.writerow([DOMAIN.capitalize(), "Summary"])
+            for item_name, summary in sorted(summaries.items()):
+                writer.writerow([item_name, summary])
 
         return summaries
                 
