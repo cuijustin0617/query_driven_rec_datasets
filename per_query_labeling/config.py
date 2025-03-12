@@ -20,8 +20,8 @@ LLM_PROVIDER = "gemini"  # Options: openai, deepseek, gemini
 LLM_MODEL = "gemini-2.0-flash"
 
 # Provider-specific API keys - using environment variables
-#OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
-#DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY_FREE", "")
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
 MAX_RETRIES = 8  # Max retries for LLM calls

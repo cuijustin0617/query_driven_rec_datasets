@@ -10,7 +10,7 @@ from openai import OpenAI
 from google import genai
 from google.genai import types
 
-from ..config import LLM_PROVIDER, LLM_MODEL, MAX_RETRIES
+from ..config import LLM_PROVIDER, LLM_MODEL, MAX_RETRIES, GEMINI_API_KEY
 
 # Load environment variables from .env file
 load_dotenv()
