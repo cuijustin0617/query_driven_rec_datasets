@@ -14,20 +14,7 @@ from google.genai import types
 from ..config import LLM_PROVIDER, LLM_MODEL, MAX_RETRIES
 
 # Load environment variables from .env file
-# Make sure to load from the project root directory
-load_dotenv(dotenv_path=Path(__file__).parent.parent.parent / '.env')
-
-# Debug: Print loaded Gemini API keys
-print("Available Gemini API keys:")
-for i in range(1, 10):  # Check up to 10 keys
-    key = os.environ.get(f"GEMINI_API_KEY_{i}")
-    if key:
-        # Print first few characters for verification
-        print(f"GEMINI_API_KEY_{i}: {key[:10]}...")
-    else:
-        if i == 1:
-            print("No numbered Gemini API keys found!")
-        break
+load_dotenv()
 
 class BaseLLMClient(ABC):
     """Abstract base class for LLM clients."""
