@@ -1,22 +1,28 @@
-"""Configuration settings for the restaurant query relevance pipeline."""
+"""Configuration settings for the passage-based relevance pipeline."""
 import os
 from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
 
-DOMAIN = "hotel"
+# Domain settings
+DOMAIN = "travel destination"  # or "restaurant"
 
 # File paths
 BASE_DIR = Path(__file__).parent.parent  # root directory
-QUERIES_PATH = BASE_DIR / "queries/queries_hotel_v2.txt"
-DOCS_DIR = BASE_DIR / "data/docs/nyc_hotels/docs_258"
-OUTPUT_DIR = BASE_DIR / "per_query_labeling/datasets/nyc_258"
+DENSE_RESULTS_PATH = BASE_DIR / "data/dense_results/travel_dest/dense_result.json"
+OUTPUT_DIR = BASE_DIR / "per_passage_labeling/datasets/travel_dest"
 
 # Create output directories
-SUMMARIES_DIR = Path(OUTPUT_DIR) / "summaries"
 RELEVANCE_DIR = Path(OUTPUT_DIR) / "relevance"
 GROUND_TRUTH_PATH = Path(OUTPUT_DIR) / "ground_truth.json"
+
+# Query selection settings
+QUERY_START_INDEX = 0  # Start index (inclusive)
+QUERY_END_INDEX = 9    # End index (inclusive) - set to process first 10 queries
+
+# Passage sampling settings
+PASSAGES_PER_BATCH = 10  # Number of passages to evaluate per LLM call
 
 # LLM settings
 LLM_PROVIDER = "gemini"  # Options: openai, deepseek, gemini
@@ -29,12 +35,14 @@ DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
 # Gemini API keys - list of keys for rotation
 GEMINI_API_KEYS = []
 
-# Load Gemini API keys from environment variables
-for i in range(1, 9):  # Assuming you have keys numbered 1-8
-    key_name = f"GEMINI_API_KEY_{i}"
-    key_value = os.environ.get(key_name)
-    if key_value:
-        GEMINI_API_KEYS.append(key_value)
+# Load numbered Gemini API keys from environment variables
+i = 1
+while True:
+    key = os.environ.get(f"GEMINI_API_KEY_{i}")
+    if not key:
+        break
+    GEMINI_API_KEYS.append(key)
+    i += 1
 
 # For backward compatibility, if no numbered keys found, use the main key
 if not GEMINI_API_KEYS:
