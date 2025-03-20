@@ -1,8 +1,7 @@
 import csv
 import json
 from collections import defaultdict, Counter
-from sklearn.metrics import cohen_kappa_score
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import cohen_kappa_score, accuracy_score, precision_score, recall_score, f1_score
 import matplotlib.pyplot as plt
 
 def load_gpt_scores(csv_path):
