@@ -94,7 +94,7 @@ def main():
 
     # Plot score distribution for first 5 sample queries
     sample_queries = list(gpt_data_by_query.keys())[:5]
-    plot_score_distribution(gpt_data_by_query, sample_queries)
+    # plot_score_distribution(gpt_data_by_query, sample_queries)
 
     # Compute metrics
     results = evaluate_metrics_per_query(gpt_data_by_query, ground_truth)

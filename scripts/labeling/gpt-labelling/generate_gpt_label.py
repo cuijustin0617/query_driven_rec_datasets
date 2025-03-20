@@ -7,14 +7,14 @@ from typing import Optional, Union
 import json
 
 # Define the schema for the response
-class Scores(BaseModel):
-    scores: dict[str, int]
+class Score(BaseModel):
+    score: int
 
 response_format = {
     "type": "json_schema",
     "json_schema":{
     "name": "output_schema",
-    "schema": Scores.model_json_schema()
+    "schema": Score.model_json_schema()
     }
 }
 
@@ -22,7 +22,7 @@ response_format = {
 API_KEY = os.getenv("OPENAI_API_KEY")
 
 class ChatGPT:
-    def __init__(self, model_name: str = "gpt-4o-2024-11-20", api_key: str = API_KEY):
+    def __init__(self, model_name: str = "gpt-4o", api_key: str = API_KEY):
         self.model_name = model_name
         self.client = OpenAI(api_key=api_key)
     def generate(self, message: list[dict], temperature: float = 0.0, response_format: Optional[dict] = None) -> Union[str, None]:
@@ -87,6 +87,34 @@ Final score must be a single integer only.
 Output format: ##final score: [score]
 '''
 
+UMBRELA_PROMPT_3 = '''
+You are tasked with evaluating how suitable **{city}** is as a travel destination for a traveler based on the provided query and city description. Assign a score from **0 to 3** primarily based on your internal knowledge of the city and the supportive evidence from the provided text.
+
+### **Scoring Guidelines:**
+- **0** = The city is irrelevant to the query or contradicts the user’s intent.  
+- **1** = The city is loosely related to the query but provides little value or relevance for the traveler.  
+- **2** = The city has some relevant features to the query, but it is not an ideal fit for the traveler’s intent.  
+- **3** = The city clearly matches the query goal and is highly suitable as a travel destination.  
+
+### **Input:**
+- **Query:** {query}  
+- **City:** {city}  
+- **City Description:** {document}  
+
+### **Evaluation Steps:**
+1. Identify the type of destination or experience the traveler seeks based on the query.  
+2. Assess the city’s overall strength as a travel destination (e.g., general popularity and tourist appeal).  
+3. Evaluate how well the city matches the query’s intent based on your internal knowledge.  
+4. Cross-check the provided city description for supporting details.  
+5. Assign a single final score.  
+
+### **Additional Instructions:**
+- Be strict in your rating — only top-tier cities should receive a score of 3. Most cities should be rated 0 or 1 unless they have clear relevance and strong alignment with the query.  
+- Consider the overall popularity of the city as a travel destination — some cities have a general popularity advantage over others for most queries.  
+- The final score should reflect both the city’s specific relevance to the query and its general strength as a travel destination.  
+'''
+
+
 def process_json(input_json_path, output_csv_path, gpt_client):
     with open(input_json_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
@@ -106,7 +134,7 @@ def process_json(input_json_path, output_csv_path, gpt_client):
             #concatenate list of passages in a document into a string
             document = "\n".join(documents)
             
-            prompt = UMBRELA_PROMPT_2.format(query=query, document=document)  ## change prompt
+            prompt = UMBRELA_PROMPT_3.format(query=query, document=document, city=city)  ## change prompt
 
             messages = [
                 {"role": "system", "content": "You are a helpful assistant that evaluates relevance scores for travel-related query-document pairs."},
@@ -121,8 +149,8 @@ def process_json(input_json_path, output_csv_path, gpt_client):
                 final_score = "Error"
             else:
                 try:
-                    scores_obj = Scores.model_validate_json(response_text)
-                    final_score = scores_obj.scores.get("final score") or scores_obj.scores.get("final_score", "Missing")
+                    scores_obj = Score.model_validate_json(response_text)
+                    final_score = scores_obj.score
                 except Exception as e:
                     print(f"    Parsing error for city {city}: {e}")
                     final_score = "ParsingError"
