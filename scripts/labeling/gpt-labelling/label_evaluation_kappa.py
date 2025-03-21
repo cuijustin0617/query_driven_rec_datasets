@@ -85,7 +85,7 @@ def evaluate_metrics_per_query(gpt_data_by_query, ground_truth):
 
 
 def main():
-    csv_path = 'scripts/labeling/gpt-labelling/labeled_documents.csv'
+    csv_path = 'per_pair_labeling/datasets/travel_dest/sample_5_gemini_labels.csv'
     json_path = 'scripts/labeling/gpt-labelling/ground_truth.json'
 
     gpt_data_by_query = load_gpt_scores(csv_path)

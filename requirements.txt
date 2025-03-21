@@ -6,3 +6,5 @@ python-dotenv
 pathlib
 setuptools
 google-genai
+matplotlib
+scikit-learn
