@@ -7,6 +7,7 @@ import json
 import time
 import re
 from dotenv import load_dotenv
+from config import PipelineConfig, get_default_config
 
 load_dotenv()
 try:
@@ -25,7 +26,7 @@ GEMINI_PAID_API_KEY = os.getenv("GEMINI_PAID_API_KEY")
 
 # Get multiple free Gemini API keys
 GEMINI_FREE_API_KEYS = []
-for i in range(1, 10):  # Try keys from 1-9
+for i in range(1, 13):  # Try keys from 1-9
     key = os.getenv(f"GEMINI_API_KEY_{i}")
     if key:
         GEMINI_FREE_API_KEYS.append(key)
@@ -173,85 +174,8 @@ def parse_gemini_score_response(response_text: str) -> int:
     
     return None
 
-# Gemini-specific prompt with explicit output formatting
-UMBRELA_PROMPT = '''
-Given a query and a document about a city, provide a score from 0 to 3, where higher scores mean the city is more relevant and helpful for a traveler with this query.
-
-Scoring Guidelines:
-0 = The city has little to do with the query.
-1 = The city is loosely related to the query, but offers little or no useful information for a traveler.
-2 = The city has some relevant features, but they are unclear, not emphasized, or mixed with unrelated details.
-3 = The city clearly meets or supports the query goal in a practical or helpful way.
-
-Instructions:
-- Assign 3 if the city fulfills the query in any meaningful way, even with extra info.
-- Assign 2 if the city shows potential to satisfy the query but lacks key details, or the relevance is partial, vague, or not well-supported.
-- Assign 1 if the city is not very helpful for the query.
-- Assign 0 only if the city has little relevance to the query.
-
-Query: {query}
-City Info: {document}
-
-Split this problem into steps:
-Consider the underlying intent of the search.
-Measure how well the content matches a likely intent of the query (M).
-Measure how trustworthy the passage is (T).
-Consider the aspects above and the relative importance of each, and decide on a final score (O). 
-
-Your response must be a single integer between 0-3. Output only the score number and nothing else.
-'''
-
-UMBRELA_PROMPT_2 ='''
-Given a query and a description of a city, assign a score from 0 to 3 based on how suitable this city is as a travel destination for someone with that interest.
-Scoring:
-0 = The city is completely unrelated to the query.
-1 = The city is weakly related, but is clearly not a good match for what the traveler is looking for.
-2 = The city has some relevant aspects, but overall is not a strong or clear match.
-3 = The city is a reasonably good or strong match for what the traveler is looking for — even if it's only partially relevant.
-Important Instructions:
-- Assign a score of 3 if the city has any practical or relevant qualities that could make it a suitable destination for the query.
-- Assign 1 only if the city clearly does not fit what the traveler likely wants.
-- Assign 0 only if the city has nothing to do with the query.
-Query: {query}
-City Description: {document}
-Steps:
-- Consider what kind of destination a traveler is seeking from the query.
-- Judge how well the city fits that intent or interest.
-- Make a final decision.
-
-Your response must be a single integer between 0-3. Output only the score number and nothing else.
-'''
-
-UMBRELA_PROMPT_3 = '''
-You are tasked with evaluating how suitable **{city}** is as a travel destination for a traveler based on the provided query and city description. Assign a score from **0 to 3** primarily based on your internal knowledge of the city and the supportive evidence from the provided text.
-
-### **Scoring Guidelines:**
-- **0** = The city is irrelevant to the query or contradicts the user's intent.  
-- **1** = The city is loosely related to the query but provides little value or relevance for the traveler.  
-- **2** = The city has some relevant features to the query, but it is not an ideal fit for the traveler's intent.  
-- **3** = The city clearly matches the query goal and is highly suitable as a travel destination.  
-
-### **Input:**
-- **Query:** {query}  
-- **City:** {city}  
-- **City Description:** {document}  
-
-### **Evaluation Steps:**
-1. Identify the type of destination or experience the traveler seeks based on the query.  
-2. Assess the city's overall strength as a travel destination (e.g., general popularity and tourist appeal).  
-3. Evaluate how well the city matches the query's intent based on your internal knowledge.  
-4. Cross-check the provided city description for supporting details.  
-5. Assign a single final score.  
-
-### **Additional Instructions:**
-- Be strict in your rating — only top-tier cities should receive a score of 3. Most cities should be rated 0 or 1 unless they have clear relevance and strong alignment with the query.  
-- Consider the overall popularity of the city as a travel destination — some cities have a general popularity advantage over others for most queries.  
-- The final score should reflect both the city's specific relevance to the query and its general strength as a travel destination.
-
-Your response must be a single integer between 0-3. Output only the score number and nothing else.
-'''
-
-def process_json(input_json_path, output_csv_path, gemini_client):
+def process_json(input_json_path, output_csv_path, gemini_client, config):
+    """Process JSON data using the configured domain."""
     # Check if output file exists and load existing results
     existing_results = {}
     if os.path.exists(output_csv_path):
@@ -261,11 +185,11 @@ def process_json(input_json_path, output_csv_path, gemini_client):
             next(reader)  # Skip header
             for row in reader:
                 if len(row) >= 3:
-                    query, city, score = row[0], row[1], row[2]
+                    query, entity, score = row[0], row[1], row[2]
                     if query not in existing_results:
                         existing_results[query] = {}
-                    existing_results[query][city] = score
-        print(f"Loaded {sum(len(cities) for cities in existing_results.values())} existing results")
+                    existing_results[query][entity] = score
+        print(f"Loaded {sum(len(entities) for entities in existing_results.values())} existing results")
 
     with open(input_json_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
@@ -279,28 +203,49 @@ def process_json(input_json_path, output_csv_path, gemini_client):
     # Create output directory if it doesn't exist
     os.makedirs(os.path.dirname(output_csv_path), exist_ok=True)
     
-    for query, city_data in data.items():
-        city_counter = 0
+    # Get the appropriate prompt based on config
+    prompts = config.format_prompts()
+    selected_prompt = prompts["UMBRELA_PROMPT_3"]  # Using prompt 3 as default
+    entity_type = config.domain_mappings["singular"]
+    
+    for query, entity_data in data.items():
+        entity_counter = 0
         query_counter += 1
         print(f"\nProcessing query {query_counter}/{total_queries}: {query}")
         
-        for city, documents in city_data.items():
-            # Skip if this query-city pair has already been processed
-            if query in existing_results and city in existing_results[query]:
-                print(f"  - Skipping already processed city: {city}")
+        for entity, value_list in entity_data.items():
+            # Skip if this query-entity pair has already been processed
+            if query in existing_results and entity in existing_results[query]:
+                print(f"  - Skipping already processed {entity_type}: {entity}")
                 # Add to results to maintain a complete output file
-                results.append([query, city, existing_results[query][city]])
+                results.append([query, entity, existing_results[query][entity]])
                 continue
                 
-            city_counter += 1
-            print(f"  - Processing city: {city} with {len(documents)} documents")
-            # concatenate list of passages in a document into a string
-            document = "\n".join(documents)
+            entity_counter += 1
             
-            prompt = UMBRELA_PROMPT_3.format(query=query, document=document, city=city)  ## change prompt
+            # Extract the document list from the second element of value_list
+            # Each entity maps to a list where the 2nd element contains the actual documents
+            if isinstance(value_list, list) and len(value_list) >= 2 and isinstance(value_list[1], list):
+                documents = value_list[1]  # Get the actual document list (second element)
+                print(f"  - Processing {entity_type}: {entity} with {len(documents)} documents")
+            else:
+                print(f"  - Warning: Unexpected format for {entity}. Treating entire value as document.")
+                documents = [str(value_list)]
+            
+            # Convert all document items to strings before joining
+            documents_as_strings = [str(doc) for doc in documents]
+            document = "\n".join(documents_as_strings)
+            
+            # Format the prompt with entity name
+            prompt = selected_prompt.format(
+                query=query, 
+                document=document, 
+                entity_name=entity  # Use the actual entity name for personalization
+            )
+            # print(f"    Prompt: {prompt}")
 
             messages = [
-                {"role": "system", "content": "You are a helpful assistant that evaluates relevance scores for travel-related query-document pairs."},
+                {"role": "system", "content": f"You are a helpful assistant that evaluates relevance scores for {entity_type}-related query-document pairs."},
                 {"role": "user", "content": prompt},
             ]
 
@@ -308,7 +253,7 @@ def process_json(input_json_path, output_csv_path, gemini_client):
             print(f"    Response: {response_text}")
 
             if response_text is None:
-                print(f"    Failed to get response for city: {city}")
+                print(f"    Failed to get response for {entity_type}: {entity}")
                 final_score = "Error"
             else:
                 try:
@@ -317,26 +262,26 @@ def process_json(input_json_path, output_csv_path, gemini_client):
                         print(f"    Failed to parse score from response: {response_text}")
                         final_score = "ParsingError"
                 except Exception as e:
-                    print(f"    Parsing error for city {city}: {e}")
+                    print(f"    Parsing error for {entity_type} {entity}: {e}")
                     final_score = "ParsingError"
             
-            results.append([query, city, final_score])
+            results.append([query, entity, final_score])
             processed_count += 1
             
             # Save intermediate results periodically
             if processed_count % save_frequency == 0:
-                save_results_to_csv(output_csv_path, results)
+                save_results_to_csv(output_csv_path, results, config)
                 print(f"Saved intermediate results after processing {processed_count} items")
 
     # Final save of all results
-    save_results_to_csv(output_csv_path, results)
+    save_results_to_csv(output_csv_path, results, config)
     print(f"\nProcessing completed. Results saved to {output_csv_path}")
 
-def save_results_to_csv(output_csv_path, results):
-    """Save results to CSV file."""
+def save_results_to_csv(output_csv_path, results, config):
+    """Save results to CSV file with domain-specific headers."""
     with open(output_csv_path, 'w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
-        writer.writerow(['Query', 'City', 'Relevance Score'])
+        writer.writerow(config.get_csv_headers())
         writer.writerows(results)
 
 def main():
@@ -351,10 +296,11 @@ def main():
         free_api_keys=GEMINI_FREE_API_KEYS
     )
 
-    input_json_path = "data/dense_results/travel_dest/sample_5_dense_result.json"
-    output_csv_path = "per_pair_labeling/datasets/travel_dest/sample_5_gemini_labels.csv"
-
-    process_json(input_json_path, output_csv_path, gemini_client)
+    # Load configuration
+    config = get_default_config()
+    
+    # Use paths from config
+    process_json(config.input_json_path, config.output_csv_path, gemini_client, config)
 
 if __name__ == "__main__":
     main()
