@@ -26,7 +26,7 @@ GEMINI_PAID_API_KEY = os.getenv("GEMINI_PAID_API_KEY")
 
 # Get multiple free Gemini API keys
 GEMINI_FREE_API_KEYS = []
-for i in range(1, 13):  # Try keys from 1-9
+for i in range(1, 21):  # Try keys from 1-20
     key = os.getenv(f"GEMINI_API_KEY_{i}")
     if key:
         GEMINI_FREE_API_KEYS.append(key)
