@@ -38,9 +38,9 @@ class PipelineConfig:
     
     def __init__(
         self,
-        domain: str = "restaurant",
-        input_json_path: str = "data/dense_results/restaurant/phi/eqr_10_dense_results.json",
-        output_dir: str = "per_pair_labeling/datasets/restaurant/phi_gemini_labels",
+        domain: str = "city",
+        input_json_path: str = "data/dense_results/travel_dest/eqr_10_dense_results.json",
+        output_dir: str = "per_pair_labeling/datasets/travel_dest",
         output_filename: str = "gemini_labels.csv"
     ):
         # Validate domain
@@ -54,10 +54,8 @@ class PipelineConfig:
         self.input_json_path = input_json_path
         
         # Set output path
-        domain_output_dir = os.path.join(output_dir, 
-                                        f"{domain}_recommendation" if domain != "city" else "travel_dest")
-        os.makedirs(domain_output_dir, exist_ok=True)
-        self.output_csv_path = os.path.join(domain_output_dir, output_filename)
+        os.makedirs(output_dir, exist_ok=True)
+        self.output_csv_path = os.path.join(output_dir, output_filename)
     
     def get_csv_headers(self) -> list:
         """Get CSV headers based on the domain."""
