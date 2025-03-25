@@ -68,24 +68,24 @@ def evaluate_metrics_per_query(gpt_data_by_query, ground_truth):
 
             results[query] = {
                 'kappa': round(kappa, 4),
-                'accuracy': round(accuracy, 4),
-                'precision': round(precision, 4),
-                'recall': round(recall, 4),
-                'f1_score': round(f1, 4)
+                # 'accuracy': round(accuracy, 4),
+                # 'precision': round(precision, 4),
+                # 'recall': round(recall, 4),
+                # 'f1_score': round(f1, 4)
             }
         else:
             results[query] = {
                 'kappa': None,
-                'accuracy': None,
-                'precision': None,
-                'recall': None,
-                'f1_score': None
+                # 'accuracy': None,
+                # 'precision': None,
+                # 'recall': None,
+                # 'f1_score': None
             }
     return results
 
 
 def main():
-    csv_path = 'per_pair_labeling/datasets/travel_dest/sample_5_gemini_labels.csv'
+    csv_path = 'per_pair_labeling/datasets/travel_dest/gemini_labels.csv'
     json_path = 'scripts/labeling/gpt-labelling/ground_truth.json'
 
     gpt_data_by_query = load_gpt_scores(csv_path)
@@ -100,9 +100,8 @@ def main():
     results = evaluate_metrics_per_query(gpt_data_by_query, ground_truth)
     print("\nPer-Query Evaluation Metrics:")
     for query, metrics in results.items():
-        print(f"\nQuery: {query}")
         for metric, value in metrics.items():
-            print(f"{metric.capitalize()}: {value}")
+            print(f"{query} - {metric.capitalize()}: {value}")
 
 if __name__ == "__main__":
     main()
