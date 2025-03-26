@@ -1,4 +1,4 @@
-# Yelp Restaurants IR Dataset
+# Query-Driven Recommendation Datasets
 This repo contains 4 pipelines for synthetically generating query-driven recommendation datasets.
 
 Summary of Pipeline Differences
