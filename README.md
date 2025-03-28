@@ -1,6 +1,16 @@
-# Yelp Restaurants IR Dataset
-This repo contains 2 pipelines for synthetically generating query-driven recommendation datasets, leveraging Yelp restaurant review data (though the architecture should be easily adaptable to other domain, given appropriate data)
-## 1 Per Document Labeling Pipeline
+# Query-Driven Recommendation Datasets
+This repo contains 4 pipelines for synthetically generating query-driven recommendation datasets.
+
+Summary of Pipeline Differences
+| Pipeline | Processing Unit | LLM Calls | Evaluation Strategy | Output Format |
+|----------|----------------|-----------|---------------------|---------------|
+| Per Document | 1 document at a time | 1 per document| Entire document evaluated against all queries | Binary (True/False) |
+| Per Passage | Batches of passages | Multiple per document for each query| Passage-level scores aggregated to document score | Numerical scores aggregated |
+| Per Query | 2-stage process | 1 per document for summaries + 1 per query for judgments | Two-stage: summarize then judge | Relevance scores (0-3) |
+| Per Pair | 1 document at a time | 1 per document-query pair | Full document description against query | Relevance scores (0-3) |
+
+
+## Per Document Labeling Pipeline
 This pipeline provides a more sophisticated approach to generating relevance judgments by processing documents through a multi-step pipeline using an LLM.
 
 
@@ -71,7 +81,7 @@ Edit the `per_query_labeling/config.py` file to customize:
 The output will be saved to the configured output directory, with separate folders for summaries, relevance judgments, and a final ground truth JSON file.
 
 
-## 2 Per Query Labeling Pipeline
+## Per Query Labeling Pipeline
 
 ### 1. Generate Relevance Labels
 
