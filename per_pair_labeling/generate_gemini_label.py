@@ -50,7 +50,7 @@ class ChatGemini:
         self.key_failure_counts = {i: 0 for i in range(len(self.free_api_keys))}
         self.max_failures_per_key = 2
         self.consecutive_failures = 0
-        self.max_consecutive_failures = 20
+        self.max_consecutive_failures = 40
         self.successful_calls_count = 0  # Track successful API calls for current key
         self.max_successful_calls = 10   # Rotate after this many successful calls
         
@@ -100,7 +100,7 @@ class ChatGemini:
                 return result
             except Exception as e:
                 if attempt < max_retries - 1:
-                    sleep_time = 2**attempt
+                    sleep_time = 1**attempt
                     print(f"Error: {e}. Attempt {attempt + 1} failed. Retrying in {sleep_time} seconds...")
                     time.sleep(sleep_time)
                 else:
