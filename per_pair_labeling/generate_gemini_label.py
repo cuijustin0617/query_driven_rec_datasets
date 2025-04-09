@@ -26,7 +26,7 @@ GEMINI_PAID_API_KEY = os.getenv("GEMINI_PAID_API_KEY")
 
 # Get multiple free Gemini API keys
 GEMINI_FREE_API_KEYS = []
-for i in range(1, 21):  # Try keys from 1-20
+for i in range(1, 16):  # Try keys from 1-20
     key = os.getenv(f"GEMINI_API_KEY_{i}")
     if key:
         GEMINI_FREE_API_KEYS.append(key)
@@ -51,6 +51,8 @@ class ChatGemini:
         self.max_failures_per_key = 2
         self.consecutive_failures = 0
         self.max_consecutive_failures = 20
+        self.successful_calls_count = 0  # Track successful API calls for current key
+        self.max_successful_calls = 10   # Rotate after this many successful calls
         
         # Initialize with free key first even if paid key is available
         self._initialize_client()
@@ -76,6 +78,7 @@ class ChatGemini:
         
         # Move to the next free key
         self.key_failure_counts[self.current_key_index] = 0
+        self.successful_calls_count = 0  # Reset successful calls counter
         self.current_key_index = (self.current_key_index + 1) % len(self.free_api_keys)
         
         # If we've tried all free keys and have a paid key, switch to paid key
@@ -138,6 +141,12 @@ class ChatGemini:
             if not self.using_paid_key:
                 self.key_failure_counts[self.current_key_index] = 0
                 self.consecutive_failures = 0
+                self.successful_calls_count += 1
+                
+                # Check if we've reached the max successful calls threshold
+                if self.successful_calls_count >= self.max_successful_calls:
+                    print(f"Rotating key after {self.successful_calls_count} successful calls")
+                    self._rotate_key()
             
             return response.text.strip()
             
@@ -146,6 +155,7 @@ class ChatGemini:
             if not self.using_paid_key:
                 self.key_failure_counts[self.current_key_index] += 1
                 self.consecutive_failures += 1
+                self.successful_calls_count = 0  # Reset successful calls on failure
                 print(f"Consecutive failures across all free keys: {self.consecutive_failures}/{self.max_consecutive_failures}")
             
             # If we've failed too many times with this key, try another one
