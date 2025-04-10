@@ -46,7 +46,7 @@ class ChatGemini:
         if not (self.paid_api_key or self.free_api_keys):
             raise ValueError("No API keys provided for Gemini client")
         
-        self.using_paid_key = True  # Default to using free keys
+        self.using_paid_key = False  # Default to using free keys
         self.current_key_index = 0
         self.key_failure_counts = {i: 0 for i in range(len(self.free_api_keys))}
         self.max_failures_per_key = 2
@@ -97,7 +97,7 @@ class ChatGemini:
         for attempt in range(max_retries):
             try: 
                 result = self._call_api(messages, temperature)
-                time.sleep(0.3)
+                time.sleep(1)
                 self.consecutive_failures = 0  # Reset consecutive failures on success
                 return result
             except Exception as e:
