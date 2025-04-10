@@ -46,7 +46,7 @@ class ChatGemini:
         if not (self.paid_api_key or self.free_api_keys):
             raise ValueError("No API keys provided for Gemini client")
         
-        self.using_paid_key = False  # Default to using free keys
+        self.using_paid_key = True  # Default to using free keys
         self.current_key_index = 0
         self.key_failure_counts = {i: 0 for i in range(len(self.free_api_keys))}
         self.max_failures_per_key = 2
@@ -98,7 +98,6 @@ class ChatGemini:
             try: 
                 result = self._call_api(messages, temperature)
                 self.consecutive_failures = 0  # Reset consecutive failures on success
-                time.sleep(0.3)
                 return result
             except Exception as e:
                 if attempt < max_retries - 1:
@@ -186,6 +185,61 @@ def parse_gemini_score_response(response_text: str) -> int:
     
     return None
 
+def load_disabled_queries(config: PipelineConfig) -> Set[str]:
+    """Load the list of disabled queries from a JSON file."""
+    if os.path.exists(config.disabled_queries_path):
+        print(f"Loading disabled queries from {config.disabled_queries_path}")
+        try:
+            with open(config.disabled_queries_path, 'r', encoding='utf-8') as f:
+                disabled_queries = set(json.load(f))
+            print(f"Loaded {len(disabled_queries)} disabled queries")
+            return disabled_queries
+        except Exception as e:
+            print(f"Error loading disabled queries: {e}")
+    
+    print("No disabled queries file found, starting with empty set")
+    return set()
+
+def save_disabled_queries(disabled_queries: Set[str], config: PipelineConfig) -> None:
+    """Save the list of disabled queries to a JSON file."""
+    print(f"Saving {len(disabled_queries)} disabled queries to {config.disabled_queries_path}")
+    with open(config.disabled_queries_path, 'w', encoding='utf-8') as f:
+        json.dump(list(disabled_queries), f, indent=2)
+
+def check_and_update_disabled_queries(
+    query: str, 
+    current_scores: List[List[str]], 
+    disabled_queries: Set[str],
+    config: PipelineConfig
+) -> bool:
+    """
+    Check if a query should be disabled based on its scores and update the disabled queries set.
+    
+    Args:
+        query: The query to check
+        current_scores: List of [query, entity, score] lists for this query
+        disabled_queries: Set of currently disabled queries
+        config: Pipeline configuration
+        
+    Returns:
+        bool: True if the query should be disabled, False otherwise
+    """
+    # Count valid scores of 3 for this query
+    scores_for_query = [s for s in current_scores if s[0] == query]
+    
+    # Only check if we have enough labels
+    if len(scores_for_query) >= config.max_labels_threshold:
+        # Count how many scores are '3'
+        high_scores = sum(1 for _, _, score in scores_for_query if score == '3')
+        
+        # Check if too many high scores
+        if high_scores >= config.max_high_score_threshold:
+            print(f"\n⚠️ Query '{query}' has {high_scores}/{len(scores_for_query)} high scores, disabling it")
+            disabled_queries.add(query)
+            return True
+    
+    return False
+
 def process_json(input_json_path, output_csv_path, gemini_client, config):
     """Process JSON data using the configured domain."""
     # Load disabled queries
@@ -218,6 +272,7 @@ def process_json(input_json_path, output_csv_path, gemini_client, config):
     query_counter = 0
     processed_count = 0
     save_frequency = 10  # Save after every 10 processed items
+    processed_since_last_save = 0
     
     # Create output directory if it doesn't exist
     os.makedirs(os.path.dirname(output_csv_path), exist_ok=True)
@@ -332,6 +387,7 @@ def process_json(input_json_path, output_csv_path, gemini_client, config):
             
             results.append([query, entity, final_score])
             processed_count += 1
+            processed_since_last_save += 1
             
             # Track counts for disabling check
             query_result_count += 1
@@ -362,17 +418,18 @@ def process_json(input_json_path, output_csv_path, gemini_client, config):
             
             # Save intermediate results periodically
             if processed_count % save_frequency == 0:
-                save_results_to_csv(output_csv_path, results, config)
+                save_results_to_csv(output_csv_path, results, config, processed_since_last_save)
+                processed_since_last_save = 0  # Reset counter after saving
                 save_disabled_queries(disabled_queries, config)
                 print(f"Saved intermediate results after processing {processed_count} items")
 
     # Final save of all results
-    save_results_to_csv(output_csv_path, results, config)
+    save_results_to_csv(output_csv_path, results, config, is_final_save=True)
     save_disabled_queries(disabled_queries, config)
     print(f"\nProcessing completed. Results saved to {output_csv_path}")
     print(f"Disabled queries saved to {config.disabled_queries_path}")
 
-def save_results_to_csv(output_csv_path, results, config, is_final_save=False):
+def save_results_to_csv(output_csv_path, results, config, processed_since_last_save=0, is_final_save=False):
     """Save results to CSV file with domain-specific headers."""
     # For intermediate saves, only append new results since last save
     if not is_final_save and os.path.exists(output_csv_path):
