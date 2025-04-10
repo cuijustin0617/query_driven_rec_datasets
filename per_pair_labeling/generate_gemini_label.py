@@ -2,12 +2,13 @@ import os
 import csv
 from pathlib import Path
 from pydantic import BaseModel
-from typing import Optional, Union, List, Dict, Any
+from typing import Optional, Union, List, Dict, Any, Set
 import json
 import time
 import re
 from dotenv import load_dotenv
 from config import PipelineConfig, get_default_config
+import shutil
 
 load_dotenv()
 try:
@@ -26,7 +27,7 @@ GEMINI_PAID_API_KEY = os.getenv("GEMINI_PAID_API_KEY")
 
 # Get multiple free Gemini API keys
 GEMINI_FREE_API_KEYS = []
-for i in range(1, 16):  # Try keys from 1-20
+for i in range(1, 30):  # Try keys from 1-20
     key = os.getenv(f"GEMINI_API_KEY_{i}")
     if key:
         GEMINI_FREE_API_KEYS.append(key)
@@ -92,15 +93,16 @@ class ChatGemini:
     
     def generate(self, messages: List[Dict[str, Any]], temperature: float = 0.0) -> Union[str, None]:
         """Get a response from Gemini with retry logic."""
-        max_retries = 10
+        max_retries = 80
         for attempt in range(max_retries):
             try: 
                 result = self._call_api(messages, temperature)
                 self.consecutive_failures = 0  # Reset consecutive failures on success
+                time.sleep(0.3)
                 return result
             except Exception as e:
                 if attempt < max_retries - 1:
-                    sleep_time = 1**attempt
+                    sleep_time = 1.2**attempt
                     print(f"Error: {e}. Attempt {attempt + 1} failed. Retrying in {sleep_time} seconds...")
                     time.sleep(sleep_time)
                 else:
@@ -186,6 +188,13 @@ def parse_gemini_score_response(response_text: str) -> int:
 
 def process_json(input_json_path, output_csv_path, gemini_client, config):
     """Process JSON data using the configured domain."""
+    # Load disabled queries
+    disabled_queries = load_disabled_queries(config)
+    
+    # Set to track queries that have already been evaluated for disabling
+    evaluated_max_queries = set()  # For max_labels_threshold check
+    evaluated_min_queries = set()  # For min_labels_threshold check
+    
     # Check if output file exists and load existing results
     existing_results = {}
     if os.path.exists(output_csv_path):
@@ -219,17 +228,62 @@ def process_json(input_json_path, output_csv_path, gemini_client, config):
     entity_type = config.domain_mappings["singular"]
     
     for query, entity_data in data.items():
+        # Skip if this query is disabled
+        if query in disabled_queries:
+            print(f"\nSkipping disabled query: {query}")
+            
+            # Add existing results for this query to maintain complete output
+            if query in existing_results:
+                for ent, score in existing_results[query].items():
+                    results.append([query, ent, score])
+            
+            continue
+        
         entity_counter = 0
         query_counter += 1
         print(f"\nProcessing query {query_counter}/{total_queries}: {query}")
         
+        # Load current query's scores for tracking
+        query_result_count = 0
+        high_score_count = 0
+        
         for entity, value_list in entity_data.items():
             # Skip if this query-entity pair has already been processed
             if query in existing_results and entity in existing_results[query]:
+                score = existing_results[query][entity]
                 print(f"  - Skipping already processed {entity_type}: {entity}")
+                
                 # Add to results to maintain a complete output file
-                results.append([query, entity, existing_results[query][entity]])
+                results.append([query, entity, score])
+                
+                # Track counts for disabling check
+                query_result_count += 1
+                if score == '3':
+                    high_score_count += 1
+                
                 continue
+                
+            # Check for min threshold (too few high scores at 100 labels)
+            if query_result_count == config.min_labels_threshold and query not in evaluated_min_queries:
+                evaluated_min_queries.add(query)
+                if high_score_count < config.min_high_score_threshold:
+                    print(f"\n⚠️ Query '{query}' has only {high_score_count}/{query_result_count} high scores at minimum threshold, disabling it")
+                    disabled_queries.add(query)
+                    save_disabled_queries(disabled_queries, config)
+                    break
+                else:
+                    print(f"\nQuery '{query}' has {high_score_count}/{query_result_count} high scores at minimum threshold, continuing")
+                
+            # Check for max threshold (too many high scores at 200 labels)
+            if query_result_count == config.max_labels_threshold and query not in evaluated_max_queries:
+                evaluated_max_queries.add(query)
+                if high_score_count >= config.max_high_score_threshold:
+                    print(f"\n⚠️ Query '{query}' has {high_score_count}/{query_result_count} high scores at maximum threshold, disabling it")
+                    disabled_queries.add(query)
+                    save_disabled_queries(disabled_queries, config)
+                    break
+                else:
+                    print(f"\nQuery '{query}' has only {high_score_count}/{query_result_count} high scores at maximum threshold, continuing")
                 
             entity_counter += 1
             
@@ -252,7 +306,6 @@ def process_json(input_json_path, output_csv_path, gemini_client, config):
                 document=document, 
                 entity_name=entity  # Use the actual entity name for personalization
             )
-            # print(f"    Prompt: {prompt}")
 
             messages = [
                 {"role": "system", "content": f"You are a helpful assistant that evaluates relevance scores for {entity_type}-related query-document pairs."},
@@ -271,6 +324,8 @@ def process_json(input_json_path, output_csv_path, gemini_client, config):
                     if final_score is None:
                         print(f"    Failed to parse score from response: {response_text}")
                         final_score = "ParsingError"
+                    else:
+                        final_score = str(final_score)  # Convert to string for consistency
                 except Exception as e:
                     print(f"    Parsing error for {entity_type} {entity}: {e}")
                     final_score = "ParsingError"
@@ -278,17 +333,63 @@ def process_json(input_json_path, output_csv_path, gemini_client, config):
             results.append([query, entity, final_score])
             processed_count += 1
             
+            # Track counts for disabling check
+            query_result_count += 1
+            if final_score == '3':
+                high_score_count += 1
+                
+            # Check for min threshold (too few high scores at 100 labels)
+            if query_result_count == config.min_labels_threshold and query not in evaluated_min_queries:
+                evaluated_min_queries.add(query)
+                if high_score_count < config.min_high_score_threshold:
+                    print(f"\n⚠️ Query '{query}' has only {high_score_count}/{query_result_count} high scores at minimum threshold, disabling it")
+                    disabled_queries.add(query)
+                    save_disabled_queries(disabled_queries, config)
+                    break
+                else:
+                    print(f"\nQuery '{query}' has {high_score_count}/{query_result_count} high scores at minimum threshold, continuing")
+                
+            # Check for max threshold (too many high scores at 200 labels)
+            if query_result_count == config.max_labels_threshold and query not in evaluated_max_queries:
+                evaluated_max_queries.add(query)
+                if high_score_count >= config.max_high_score_threshold:
+                    print(f"\n⚠️ Query '{query}' has {high_score_count}/{query_result_count} high scores at maximum threshold, disabling it")
+                    disabled_queries.add(query)
+                    save_disabled_queries(disabled_queries, config)
+                    break
+                else:
+                    print(f"\nQuery '{query}' has only {high_score_count}/{query_result_count} high scores at maximum threshold, continuing")
+            
             # Save intermediate results periodically
             if processed_count % save_frequency == 0:
                 save_results_to_csv(output_csv_path, results, config)
+                save_disabled_queries(disabled_queries, config)
                 print(f"Saved intermediate results after processing {processed_count} items")
 
     # Final save of all results
     save_results_to_csv(output_csv_path, results, config)
+    save_disabled_queries(disabled_queries, config)
     print(f"\nProcessing completed. Results saved to {output_csv_path}")
+    print(f"Disabled queries saved to {config.disabled_queries_path}")
 
-def save_results_to_csv(output_csv_path, results, config):
+def save_results_to_csv(output_csv_path, results, config, is_final_save=False):
     """Save results to CSV file with domain-specific headers."""
+    # For intermediate saves, only append new results since last save
+    if not is_final_save and os.path.exists(output_csv_path):
+        # Open file in append mode
+        with open(output_csv_path, 'a', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            # Only write rows that were added since last save
+            writer.writerows(results[-processed_since_last_save:])
+        return
+        
+    # For final save or if file doesn't exist, do a complete write
+    # Create backup of existing file first
+    if os.path.exists(output_csv_path):
+        backup_path = output_csv_path + '.backup'
+        shutil.copy(output_csv_path, backup_path)
+        
+    # Write complete results
     with open(output_csv_path, 'w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         writer.writerow(config.get_csv_headers())

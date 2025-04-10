@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 # Define domain-specific language mappings
 DOMAIN_MAPPINGS = {
@@ -39,9 +39,10 @@ class PipelineConfig:
     def __init__(
         self,
         domain: str = "city",
-        input_json_path: str = "data/dense_results/travel_dest/dense_result_apr8_part1.json",
+        input_json_path: str = "data/dense_results/travel_dest/dense_result_apr8_part2.json",
         output_dir: str = "per_pair_labeling/datasets/travel_dest",
-        output_filename: str = "gemini_labels_apr8_part1.csv"
+        output_filename: str = "gemini_labels_apr8_part2.csv",
+        disabled_queries_filename: str = "disabled_queries.json"
     ):
         # Validate domain
         if domain not in DOMAIN_MAPPINGS:
@@ -56,6 +57,17 @@ class PipelineConfig:
         # Set output path
         os.makedirs(output_dir, exist_ok=True)
         self.output_csv_path = os.path.join(output_dir, output_filename)
+        
+        # Set disabled queries path
+        self.disabled_queries_path = os.path.join(output_dir, disabled_queries_filename)
+        
+        # Parameters for query disabling - too many high scores (easy query)
+        self.max_labels_threshold = 200  # Number of labels to check before disabling a query
+        self.max_high_score_threshold = 110  # Max number of '3' scores before disabling a query
+        
+        # Parameters for query disabling - too few high scores (difficult query)
+        self.min_labels_threshold = 100  # Check for too few high scores at this threshold
+        self.min_high_score_threshold = 3  # Min number of '3' scores required at min_labels_threshold
     
     def get_csv_headers(self) -> list:
         """Get CSV headers based on the domain."""
