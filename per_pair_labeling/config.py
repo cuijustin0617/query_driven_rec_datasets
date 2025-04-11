@@ -39,10 +39,10 @@ class PipelineConfig:
     def __init__(
         self,
         domain: str = "hotel",     ##### TO CHANGE #####
-        input_json_path: str = "data/dense_results/hotel/chicago/dense_result_apr10.json",  ##### TO CHANGE #####
-        output_dir: str = "per_pair_labeling/datasets/hotel_apr10/chicago",  ##### TO CHANGE #####
-        output_filename: str = "gemini_labels_apr10.csv",  ##### TO CHANGE #####
-        disabled_queries_filename: str = "disabled_queries_apr10.json"  ##### TO CHANGE #####
+        input_json_path: str = "data/dense_results/hotel/london/dense_result_apr11.json",  ##### TO CHANGE #####
+        output_dir: str = "per_pair_labeling/datasets/hotel_apr11/london",  ##### TO CHANGE #####
+        output_filename: str = "gemini_labels_apr11.csv",  ##### TO CHANGE #####
+        disabled_queries_filename: str = "disabled_queries_apr11.json"  ##### TO CHANGE #####
     ):
         # Validate domain
         if domain not in DOMAIN_MAPPINGS:

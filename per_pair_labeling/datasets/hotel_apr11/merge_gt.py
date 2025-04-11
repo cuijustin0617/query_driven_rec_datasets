@@ -5,16 +5,16 @@ import os
 from collections import defaultdict, Counter
 
 # Path definitions
-nyc_dir = "per_pair_labeling/datasets/hotel_apr10/nyc"   #### TO CHANGE ####
-montreal_dir = "per_pair_labeling/datasets/hotel_apr10/montreal"  #### TO CHANGE ####
-london_dir = "per_pair_labeling/datasets/hotel_apr10/london"  #### TO CHANGE ####
-chicago_dir = "per_pair_labeling/datasets/hotel_apr10/chicago"  #### TO CHANGE ####
+nyc_dir = "per_pair_labeling/datasets/hotel_apr11/nyc"   #### TO CHANGE ####
+montreal_dir = "per_pair_labeling/datasets/hotel_apr11/montreal"  #### TO CHANGE ####
+london_dir = "per_pair_labeling/datasets/hotel_apr11/london"  #### TO CHANGE ####
+chicago_dir = "per_pair_labeling/datasets/hotel_apr11/chicago"  #### TO CHANGE ####
 
 # Get CSV file paths
-nyc_csv = os.path.join(nyc_dir, f"gemini_labels_apr10.csv")    #### TO CHANGE ####
-montreal_csv = os.path.join(montreal_dir, f"gemini_labels_apr10.csv")  #### TO CHANGE ####
-london_csv = os.path.join(london_dir, f"gemini_labels_apr10.csv")  #### TO CHANGE ####
-chicago_csv = os.path.join(chicago_dir, f"gemini_labels_apr10.csv")  #### TO CHANGE ####
+nyc_csv = os.path.join(nyc_dir, f"gemini_labels_apr11.csv")    #### TO CHANGE ####
+montreal_csv = os.path.join(montreal_dir, f"gemini_labels_apr11.csv")  #### TO CHANGE ####
+london_csv = os.path.join(london_dir, f"gemini_labels_apr11.csv")  #### TO CHANGE ####
+chicago_csv = os.path.join(chicago_dir, f"gemini_labels_apr11.csv")  #### TO CHANGE ####
 
 # Thresholds
 MIN_THRESHOLD = 0.005  # 1.5%
