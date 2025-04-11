@@ -50,5 +50,5 @@ if __name__ == "__main__":
         # Default to a sample path if none provided
         #csv_file_path = "per_pair_labeling/datasets/restaurant/new_orl_gemini_labels/restaurant_recommendation/gemini_labels.csv"
         #csv_file_path = "per_pair_labeling/datasets/travel_dest/sample_5_gemini_labels.csv"
-        csv_file_path = "per_pair_labeling/datasets/travel_dest/gemini_labels.csv"
+        csv_file_path = "per_pair_labeling/datasets/restaurant/new_orl/gemini_labels_apr9_part1.csv"
     analyze_query_ratings(csv_file_path)

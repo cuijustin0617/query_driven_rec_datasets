@@ -97,7 +97,7 @@ class ChatGemini:
         for attempt in range(max_retries):
             try: 
                 result = self._call_api(messages, temperature)
-                time.sleep(1)
+                # time.sleep(1)
                 self.consecutive_failures = 0  # Reset consecutive failures on success
                 return result
             except Exception as e:
