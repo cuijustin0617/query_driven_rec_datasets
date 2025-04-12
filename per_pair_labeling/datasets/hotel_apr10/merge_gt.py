@@ -97,17 +97,17 @@ def create_ground_truth(df, qualified_queries, output_file):
     
     return ground_truth
 
-# # Create ground truth files
-# nyc_gt = create_ground_truth(nyc_df, overlapping_qualified, os.path.join(nyc_dir, "ground_truth.json"))
-# montreal_gt = create_ground_truth(montreal_df, overlapping_qualified, os.path.join(montreal_dir, "ground_truth.json"))
-# london_gt = create_ground_truth(london_df, overlapping_qualified, os.path.join(london_dir, "ground_truth.json"))
-# chicago_gt = create_ground_truth(chicago_df, overlapping_qualified, os.path.join(chicago_dir, "ground_truth.json"))
+# Create ground truth files
+nyc_gt = create_ground_truth(nyc_df, overlapping_qualified, os.path.join(nyc_dir, "ground_truth.json"))
+montreal_gt = create_ground_truth(montreal_df, overlapping_qualified, os.path.join(montreal_dir, "ground_truth.json"))
+london_gt = create_ground_truth(london_df, overlapping_qualified, os.path.join(london_dir, "ground_truth.json"))
+chicago_gt = create_ground_truth(chicago_df, overlapping_qualified, os.path.join(chicago_dir, "ground_truth.json"))
 
-# print(f"\nCreated ground truth files:")
-# print(f"NYC: {len(nyc_gt)} queries in ground_truth.json")
-# print(f"Montreal: {len(montreal_gt)} queries in ground_truth.json")
-# print(f"London: {len(london_gt)} queries in ground_truth.json")
-# print(f"Chicago: {len(chicago_gt)} queries in ground_truth.json")
+print(f"\nCreated ground truth files:")
+print(f"NYC: {len(nyc_gt)} queries in ground_truth.json")
+print(f"Montreal: {len(montreal_gt)} queries in ground_truth.json")
+print(f"London: {len(london_gt)} queries in ground_truth.json")
+print(f"Chicago: {len(chicago_gt)} queries in ground_truth.json")
 
 # Print overall statistics
 print("\nOverall statistics:")

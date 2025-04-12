@@ -2,53 +2,59 @@ import csv
 import sys
 from collections import defaultdict
 
-def analyze_query_ratings(csv_file_path):
+def analyze_query_ratings(csv_file_paths):
     """
-    Analyze a CSV file containing query-restaurant-relevance data
+    Analyze multiple CSV files containing query-restaurant-relevance data
     and output the number of restaurants with relevance score 3
-    out of the total for each unique query.
+    out of the total for each unique query for each file.
     """
-    # Initialize dictionaries to store counts
-    query_totals = defaultdict(int)
-    query_threes = defaultdict(int)
-    
-    # Read the CSV file
-    with open(csv_file_path, 'r', encoding='utf-8') as file:
-        csv_reader = csv.reader(file)
-        # Skip header row
-        header = next(csv_reader)
+    for csv_file_path in csv_file_paths:
+        # Initialize dictionaries to store counts
+        query_totals = defaultdict(int)
+        query_threes = defaultdict(int)
         
-        # Process each row
-        for row in csv_reader:
-            if len(row) >= 3:  # Ensure row has enough columns
-                query = row[0]
-                relevance_score = row[2]
-                
-                # Increment total count for this query
-                query_totals[query] += 1
-                
-                # If relevance score is 3, increment the threes count
-                if relevance_score == '3':
-                    query_threes[query] += 1
-    
-    # Print results
-    print("Query | 3s / Total | Percentage")
-    print("-" * 50)
-    
-    for query in query_totals:
-        threes = query_threes[query]
-        total = query_totals[query]
-        percentage = (threes / total) * 100 if total > 0 else 0
+        # Read the CSV file
+        with open(csv_file_path, 'r', encoding='utf-8') as file:
+            csv_reader = csv.reader(file)
+            # Skip header row
+            header = next(csv_reader)
+            
+            # Process each row
+            for row in csv_reader:
+                if len(row) >= 3:  # Ensure row has enough columns
+                    query = row[0]
+                    relevance_score = row[2]
+                    
+                    # Increment total count for this query
+                    query_totals[query] += 1
+                    
+                    # If relevance score is 3, increment the threes count
+                    if relevance_score == '3':
+                        query_threes[query] += 1
         
-        print(f"{query[:40]}... | {threes}/{total} | {percentage:.2f}%")
+        # Print results for the current file
+        print(f"\nResults for {csv_file_path}:")
+        print("Query | 3s / Total | Percentage")
+        print("-" * 50)
+        
+        for query in query_totals:
+            threes = query_threes[query]
+            total = query_totals[query]
+            percentage = (threes / total) * 100 if total > 0 else 0
+            
+            print(f"{query[:40]}... | {threes}/{total} | {percentage:.2f}%")
 
 if __name__ == "__main__":
-    # Check if file path is provided
+    # Check if file paths are provided
     if len(sys.argv) > 1:
-        csv_file_path = sys.argv[1]
+        csv_file_paths = sys.argv[1:]  # Accept multiple file paths
     else:
         # Default to a sample path if none provided
-        #csv_file_path = "per_pair_labeling/datasets/restaurant/new_orl_gemini_labels/restaurant_recommendation/gemini_labels.csv"
-        #csv_file_path = "per_pair_labeling/datasets/travel_dest/sample_5_gemini_labels.csv"
-        csv_file_path = "per_pair_labeling/datasets/restaurant/new_orl/gemini_labels_apr9_part1.csv"
-    analyze_query_ratings(csv_file_path)
+        csv_file_paths = [
+            "per_pair_labeling/datasets/hotel_apr11/montreal/gemini_labels_apr11.csv",
+            "per_pair_labeling/datasets/hotel_apr11/chicago/gemini_labels_apr11.csv",
+            "per_pair_labeling/datasets/hotel_apr11/london/gemini_labels_apr11.csv",
+            "per_pair_labeling/datasets/hotel_apr11/nyc/gemini_labels_apr11.csv",
+            # Add more default paths if needed
+        ]
+    analyze_query_ratings(csv_file_paths)
