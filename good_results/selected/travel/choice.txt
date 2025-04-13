@@ -1,0 +1,137 @@
+safe (big margin): 125
+30_travel_eqr_vs_q2d_top125_sortby_recall_at10_map_at10.png
+
+
+sources:
+- query: travel_145
+- gt: travel_145
+- eqr ran again with trial 2
+- others in travel_145
+- processed query: travel_145_trial2 for eqr
+
+
+Cities for a high school graduation trip
+Cities with spectacular waterfalls nearby
+Best beach cities for surfing
+Best cities for traditional dance performances
+I want to explore cities with underground cities
+Cities for a rejuvenating retreat
+Recommended cities for company teambuilding
+Cities with stunning sunset views
+Top cities for traditional cooking classes
+Top cities for ceramics and pottery
+Top cities for outdoor sculpture parks
+Best cities for eco-friendly tourism
+Top urban destinations for hiking enthusiasts
+I want to explore cities with historic castles
+Great cities to celebrate a child's birthday
+Cities famous for their street art
+Cities with famous clock towers and bell traditions
+Top destinations for wine lovers
+Cities with colorful buildings and neighborhoods
+Best cities for street food experiences
+Cities with rich literary history
+I want to capture stunning sunshine
+Cities famous for their traditional dance
+Cities with the most interesting and unique content for vloggers
+Spectacular coastal cities
+Cities known for their traditional weaving
+I want to explore cities with ancient temples
+I need destinations with perfect spring weather
+Cities known for their traditional celebrations
+Best cities for theater and performing arts
+Culinary cities for food lovers
+Cities renowned for their ancient ruins
+Family friendly cities for vacations
+Best cities for traditional medicine
+Top cities for wildlife enthusiasts
+Cities known for their traditional music
+Beautiful cities near water bodies
+Best cities for traditional festivals
+Cities known for their historic bookstores
+Cities with breathtaking mountain views
+Best cities for cycling adventures
+Best cities for astronomy enthusiasts
+Cities with vibrant fish markets
+Leading nightlife destinations around the world
+Most beautiful island cities to explore
+Best cities for public transportation
+Best cities for traditional music festivals
+Best cities to visit for cultural experiences
+Great cities for solo travelers
+Cities famous for their spice markets
+Best cities for summer festivals
+Vibrant cities known for their tropical atmosphere
+I want to explore cities with famous fountains
+Cities with impressive public squares
+Cities with unique architectural styles
+Best cities for traditional woodcarving
+Most popular destinations for theme park enthusiasts.
+Cities known for their traditional crafts
+Cities for art lovers
+Historic port cities to explore
+I want to relax on beautiful beaches
+I want to explore unique local events
+Cities known for entertainment
+Perfect cities for introverts
+Ideal cities for a digital detox
+Best cities to avoid crowds
+Best cities for museum enthusiasts
+Must Visit cities for your bucket list
+Best cities for stargazing opportunities
+Best cities for unique local transportation
+Best cities for winter sports
+Cities with impressive urban parks
+Best cities with tropical botanical gardens
+Top cities for luxury travel
+Best cities for panoramic viewpoints
+Top cities for music lovers
+Cities for sports enthusiasts
+Leading tech hub cities
+Top cities for adventure seekers
+Top destinations for beer enthusiasts
+I want to visit cities with famous bridges
+Top destinations for jazz and blues lovers
+Cities with impressive skylines
+Cities with spectacular garden displays
+Cities with historic covered markets
+Cities with historic universities
+Top destinations renowned for their architectural landmarks
+Best cities for winter vacations
+Best cities for water activities
+Family-friendly cities with interactive museums
+Best cities for traditional boat rides
+I want to visit cities with historic lighthouses
+Top cities for shopping enthusiasts
+Top cities for traditional architecture
+Cities with beautiful lake views
+Top cities for fashion aficionados
+Cities famous for their local desserts
+Cities known for their cave attractions
+I love histroy and culture in Rome. I want similar cities.
+I want to explore cities with famous clock towers
+Cities with a natural atmosphere
+Top cities for breakfast culture
+Top cities for botanical garden lovers
+Cities known for their film festivals
+Top cities for leisurely strolls
+Best cities for movie buffs
+Top cities for traditional sporting events
+I want to experience cities with local folklore
+Budget friendly cities for travelers
+Cities known for their thermal baths
+Top destinations for traditional glass blowing
+Cities famous for their historic defensive walls
+Cities known for their flower festivals
+Top cities for coffee enthusiasts
+Historic cities with medieval architecture
+Cities with famous botanical medicine traditions
+Educational cities for student trips
+Charming small town cities
+Cities famous for their handcrafted jewelry
+Picturesque cities for photography enthusiasts
+Best cities for river cruises
+Top cities for urban wildlife
+Cities famous for their textile museums
+Best cities for traditional handicraft workshops
+Youth Friendly cities for travelers

@@ -8,7 +8,11 @@ from matplotlib.colors import LinearSegmentedColormap
 
 def load_metric_data(metric_type: str, evaluation_metric: str, city: str, domain: str):
     """Load metric data for a specific metric type, evaluation metric, and city."""
-    path = f"pattern_analyzing/{domain}/{city}/{city}_{metric_type}/{evaluation_metric}.json"
+    if domain == 'travel':
+        # Special case for travel domain - different directory structure
+        path = f"pattern_analyzing/final_results/{domain}/{city}_{metric_type}/{evaluation_metric}.json"
+    else:
+        path = f"pattern_analyzing/final_results/{domain}/{city}/{city}_{metric_type}/{evaluation_metric}.json"
     with open(path, 'r') as f:
         return json.load(f)
 
@@ -121,9 +125,9 @@ def visualize_metrics_table(df, output_file):
     else:
         # No valid values, use default coloring
         norm_values = np.full_like(values, 0.5)
+        vmin, vmax = 0, 1  # Default range for colorbar
     
     # Create the table with colored cells based on values
-    # Use plt.colormaps instead of plt.cm.get_cmap to avoid deprecation warning
     table = ax.table(
         cellText=cell_text,
         rowLabels=df.index,
@@ -170,7 +174,7 @@ def main():
                         help='Evaluation metrics (e.g., map_at10 recall_at10 rprecision)')
     parser.add_argument('--output', type=str, default='metrics_comparison.png',
                         help='Output file path for visualization')
-    parser.add_argument('--top_n', type=int, default=50,
+    parser.add_argument('--top_n', type=int, default=150,
                         help='Number of top queries to include (default: 50, use 0 for all)')
     parser.add_argument('--domain', type=str, choices=['hotel', 'restaurant', 'restaurant_jst', 'travel'], default='hotel',
                         help='Domain to analyze (hotel, restaurant, or travel)')
@@ -178,7 +182,7 @@ def main():
     args = parser.parse_args()
     
     # Methods to consider
-    metric_types = ['eqr', 'q2e', 'q2d']
+    metric_types = ['eqr', 'q2e', 'q2d', 'none']
     
     # Cities to consider based on domain
     if args.domain == 'hotel':
@@ -225,3 +229,16 @@ def main():
 
 if __name__ == "__main__":
     main() 
+
+
+'''
+python pattern_analyzing/colored_table.py --eval_metrics map_at10 map_at30 map_at50 recall_at10 recall_at30 recall_at50 rprecision --domain travel --output travel_metrics_comparison.png
+
+python pattern_analyzing/colored_table.py --eval_metrics map_at10  --domain hotel --output hotel_map10_comparison.png
+
+python pattern_analyzing/colored_table.py --eval_metrics map_at10 map_at30 map_at50 recall_at10 recall_at30 recall_at50 rprecision --domain restaurant --output restaurant_metrics_comparison.png
+
+
+
+
+'''

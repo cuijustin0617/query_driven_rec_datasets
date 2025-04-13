@@ -51,10 +51,12 @@ if __name__ == "__main__":
     else:
         # Default to a sample path if none provided
         csv_file_paths = [
-            "per_pair_labeling/datasets/hotel_apr11/montreal/gemini_labels_apr11.csv",
-            "per_pair_labeling/datasets/hotel_apr11/chicago/gemini_labels_apr11.csv",
-            "per_pair_labeling/datasets/hotel_apr11/london/gemini_labels_apr11.csv",
-            "per_pair_labeling/datasets/hotel_apr11/nyc/gemini_labels_apr11.csv",
+            "per_pair_labeling/datasets/restaurant_apr12/new_orl/gemini_labels_apr12_part1.csv",
+            "per_pair_labeling/datasets/restaurant_apr12/new_orl/gemini_labels_apr12_part2.csv",
+            "per_pair_labeling/datasets/restaurant_apr12/new_orl/gemini_labels_apr12_part3.csv",
+            "per_pair_labeling/datasets/restaurant_apr12/phi/gemini_labels_apr12_part1.csv",
+            "per_pair_labeling/datasets/restaurant_apr12/phi/gemini_labels_apr12_part2.csv",
+            "per_pair_labeling/datasets/restaurant_apr12/phi/gemini_labels_apr12_part3.csv",
             # Add more default paths if needed
         ]
     analyze_query_ratings(csv_file_paths)
