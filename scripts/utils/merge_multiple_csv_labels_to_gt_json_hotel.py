@@ -17,14 +17,14 @@ london_csv = os.path.join(london_dir, f"gemini_labels_apr11.csv")  #### TO CHANG
 chicago_csv = os.path.join(chicago_dir, f"gemini_labels_apr11.csv")  #### TO CHANGE ####
 
 # Thresholds
-MIN_THRESHOLD = 0.005  # 1.5%
-MAX_THRESHOLD = 0.35    # 30%
+MIN_THRESHOLD = 0.005  # 1.5%  #### TO CHANGE ####
+MAX_THRESHOLD = 0.35    # 30%  #### TO CHANGE ####
 
 # Required row counts for each city
-NYC_REQUIRED_ROWS = 260
-MONTREAL_REQUIRED_ROWS = 64
-LONDON_REQUIRED_ROWS = 266
-CHICAGO_REQUIRED_ROWS = 74
+NYC_REQUIRED_ROWS = 260  #### TO CHANGE ####
+MONTREAL_REQUIRED_ROWS = 64  #### TO CHANGE ####
+LONDON_REQUIRED_ROWS = 266  #### TO CHANGE ####
+CHICAGO_REQUIRED_ROWS = 74  #### TO CHANGE ####
 
 def process_city_data(csv_file, city_name, required_row_count):
     """Process data for one city and return query statistics"""
@@ -98,10 +98,10 @@ def create_ground_truth(df, qualified_queries, output_file):
     return ground_truth
 
 # Create ground truth files
-nyc_gt = create_ground_truth(nyc_df, overlapping_qualified, os.path.join(nyc_dir, "ground_truth.json"))
-montreal_gt = create_ground_truth(montreal_df, overlapping_qualified, os.path.join(montreal_dir, "ground_truth.json"))
-london_gt = create_ground_truth(london_df, overlapping_qualified, os.path.join(london_dir, "ground_truth.json"))
-chicago_gt = create_ground_truth(chicago_df, overlapping_qualified, os.path.join(chicago_dir, "ground_truth.json"))
+nyc_gt = create_ground_truth(nyc_df, overlapping_qualified, os.path.join(nyc_dir, "ground_truth.json"))    #### TO CHANGE ####
+montreal_gt = create_ground_truth(montreal_df, overlapping_qualified, os.path.join(montreal_dir, "ground_truth.json"))    #### TO CHANGE ####   
+london_gt = create_ground_truth(london_df, overlapping_qualified, os.path.join(london_dir, "ground_truth.json"))    #### TO CHANGE ####
+chicago_gt = create_ground_truth(chicago_df, overlapping_qualified, os.path.join(chicago_dir, "ground_truth.json"))    #### TO CHANGE ####
 
 print(f"\nCreated ground truth files:")
 print(f"NYC: {len(nyc_gt)} queries in ground_truth.json")

@@ -5,9 +5,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import argparse
 
-def calculate_average_scores(directory):
-    """Calculate average scores for specific metrics in a method directory."""
+def calculate_average_scores(directory, query_list):
+    """Calculate average scores for specific metrics in a method directory,
+    only for the queries in the provided query list."""
     metrics = {}
+    
+    # Track queries found in the metric files
+    found_queries = set()
+    
     # Only include these specific metrics
     allowed_metrics = ['recall_at10', 'recall_at30', 'map_at10', 'map_at30', 'rprecision']
     
@@ -18,9 +23,22 @@ def calculate_average_scores(directory):
             if metric_name in allowed_metrics:
                 with open(os.path.join(directory, filename)) as f:
                     data = json.load(f)
-                    avg_score = sum(data.values()) / len(data)
-                    metrics[metric_name] = round(avg_score, 3)  # Round to 3 decimal places
-    return metrics
+                    
+                    # Filter data to only include queries from the query_list
+                    filtered_data = {k: v for k, v in data.items() if k in query_list}
+                    
+                    # Add found queries to our tracking set
+                    found_queries.update(filtered_data.keys())
+                    
+                    # Calculate average if we have any matching queries
+                    if filtered_data:
+                        avg_score = sum(filtered_data.values()) / len(filtered_data)
+                        metrics[metric_name] = round(avg_score, 3)  # Round to 3 decimal places
+                    else:
+                        metrics[metric_name] = 0.0  # No matching queries
+    
+    # Return both the metrics and the set of found queries
+    return metrics, found_queries
 
 def highlight_max(s):
     """Highlight the maximum in a Series."""
@@ -56,22 +74,42 @@ def save_as_image(df, output_name="metric_averages"):
     plt.savefig(f"{output_name}.png", bbox_inches='tight', dpi=300)
     plt.close()
 
+def read_queries_from_file(file_path):
+    """Read queries from a text file, each query on a separate line."""
+    with open(file_path, 'r') as f:
+        # Strip whitespace from each line and filter out empty lines
+        queries = [line.strip() for line in f if line.strip()]
+    return queries
+
 def main():
-    parser = argparse.ArgumentParser(description='Calculate metric averages for different domains')
+    parser = argparse.ArgumentParser(description='Calculate metric averages for specific queries')
     parser.add_argument('--domain', type=str, default='travel', choices=['travel', 'hotel', 'restaurant'],
                         help='Domain to analyze (travel, hotel, or restaurant)')
     parser.add_argument('--model_type', type=str, default='e5', choices=['e5', 'minilm'],
                         help='Model type to use (e5 or minilm)')
+    parser.add_argument('--query_file', type=str, required=True,
+                        help='Path to a text file containing queries (one per line)')
     args = parser.parse_args()
     
     domain = args.domain
     model_type = args.model_type
+    query_file = args.query_file
     results_dir = f"final_{model_type}"
     
+    # Read queries from the file
+    try:
+        queries = read_queries_from_file(query_file)
+        print(f"Loaded {len(queries)} queries from {query_file}")
+    except FileNotFoundError:
+        print(f"Error: Query file '{query_file}' not found")
+        return
+    
     methods = ['eqr', 'q2d', 'q2e', 'none']
-    output_name = f"{model_type}_{domain}_metric_averages"
+    output_name = f"{model_type}_{domain}_query_filtered_metric_averages"
      
     results = {}
+    # Keep track of all queries found across all methods/cities
+    all_found_queries = set()
     
     if domain == 'restaurant':
         # Handle restaurant domain which has two cities (nor and phi)
@@ -79,15 +117,20 @@ def main():
         for method in methods:
             # Store metrics for each city
             city_metrics = {}
+            city_found_queries = set()
             
             for city in cities:
                 # Match the actual directory structure
                 method_dir = os.path.join("pattern_analyzing", results_dir, domain, city, f"{city}_{method}")
                 try:
-                    city_metrics[city] = calculate_average_scores(method_dir)
+                    city_metrics[city], found_queries = calculate_average_scores(method_dir, queries)
+                    city_found_queries.update(found_queries)
                 except FileNotFoundError:
                     print(f"Warning: Directory not found: {method_dir}")
                     city_metrics[city] = {}
+            
+            # Update the set of all found queries
+            all_found_queries.update(city_found_queries)
             
             # Average the metrics across cities
             combined_metrics = {}
@@ -110,15 +153,20 @@ def main():
         for method in methods:
             # Store metrics for each city
             city_metrics = {}
+            city_found_queries = set()
             
             for city in cities:
                 # Match the actual directory structure
                 method_dir = os.path.join("pattern_analyzing", results_dir, domain, city, f"{city}_{method}")
                 try:
-                    city_metrics[city] = calculate_average_scores(method_dir)
+                    city_metrics[city], found_queries = calculate_average_scores(method_dir, queries)
+                    city_found_queries.update(found_queries)
                 except FileNotFoundError:
                     print(f"Warning: Directory not found: {method_dir}")
                     city_metrics[city] = {}
+            
+            # Update the set of all found queries
+            all_found_queries.update(city_found_queries)
             
             # Average the metrics across cities
             combined_metrics = {}
@@ -140,10 +188,20 @@ def main():
         for method in methods:
             method_dir = os.path.join("pattern_analyzing", results_dir, domain, f"{domain}_{method}")
             try:
-                results[method] = calculate_average_scores(method_dir)
+                results[method], found_queries = calculate_average_scores(method_dir, queries)
+                all_found_queries.update(found_queries)
             except FileNotFoundError:
                 print(f"Warning: Directory not found: {method_dir}")
                 results[method] = {}
+    
+    # Verify that all queries were found
+    missing_queries = set(queries) - all_found_queries
+    if missing_queries:
+        print(f"WARNING: {len(missing_queries)} queries from the file were not found in any metric files:")
+        for query in missing_queries:
+            print(f"  - {query}")
+    else:
+        print("All queries from the file were found in the metric results.")
     
     # Create DataFrame and transpose to have methods as rows and metrics as columns
     df = pd.DataFrame(results).T
@@ -154,24 +212,13 @@ def main():
     # Apply styling to highlight the max in each column
     styled_df = df.style.apply(highlight_max)
     
-    # Save as Excel
-    # styled_df.to_excel(f"{output_name}.xlsx", engine="openpyxl")
-    
     # Save as image with highlighted winners
     save_as_image(df, output_name)
     
     # Print to console with winners marked and rounded values
     print(f"Results saved to '{output_name}.png'")
-    print(f"\nAverage Scores for {domain} domain with {model_type} model (winners highlighted, rounded to 3 decimal places):")
+    print(f"\nAverage Scores for {domain} domain with {model_type} model (filtered to specified queries, winners highlighted):")
     print(styled_df.to_string())
 
 if __name__ == "__main__":
-    main() 
-
-# python pattern_analyzing/calculate_metric_averages.py --domain travel --model_type e5
-# python pattern_analyzing/calculate_metric_averages.py --domain hotel --model_type e5
-# python pattern_analyzing/calculate_metric_averages.py --domain restaurant --model_type e5
-
-# python pattern_analyzing/calculate_metric_averages.py --domain travel --model_type minilm
-# python pattern_analyzing/calculate_metric_averages.py --domain hotel --model_type minilm
-# python pattern_analyzing/calculate_metric_averages.py --domain restaurant --model_type minilm
+    main()

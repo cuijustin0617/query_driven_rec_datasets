@@ -217,6 +217,7 @@ def check_and_update_disabled_queries(
     Check if a query should be disabled based on its scores and update the disabled queries set.
     
     Args:
+        query: The query to check
         current_scores: List of [query, entity, score] lists for this query
         disabled_queries: Set of currently disabled queries
         config: Pipeline configuration

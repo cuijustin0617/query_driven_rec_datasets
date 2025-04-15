@@ -110,8 +110,8 @@ def create_ground_truth(df, qualified_queries, output_file):
     return ground_truth
 
 # Create ground truth files
-phi_gt = create_ground_truth(phi_df, overlapping_qualified, os.path.join(phi_dir, "ground_truth.json"))
-new_orl_gt = create_ground_truth(new_orl_df, overlapping_qualified, os.path.join(new_orl_dir, "ground_truth.json"))
+phi_gt = create_ground_truth(phi_df, overlapping_qualified, os.path.join(phi_dir, "ground_truth.json"))    #### TO CHANGE ####
+new_orl_gt = create_ground_truth(new_orl_df, overlapping_qualified, os.path.join(new_orl_dir, "ground_truth.json"))    #### TO CHANGE ####
 
 print(f"\nCreated ground truth files:")
 print(f"Philadelphia: {len(phi_gt)} queries in ground_truth.json")

@@ -21,18 +21,22 @@ def load_query_metrics(directory):
                     query_metrics[query_id][metric_name] = score
     return query_metrics
 
-def load_city_averaged_metrics(domain, method, cities=None):
-    """Load and average metrics across cities for a domain/method combination."""
+def load_city_averaged_metrics(domain, method, embedding_model, cities=None):
+    """Load and average metrics across cities for a domain/method combination for a specific embedding model."""
     if domain not in ['restaurant', 'hotel'] or cities is None:
         # For domains without cities or if no cities specified
-        method_dir = os.path.join("pattern_analyzing/final_minilm", domain, f"{domain}_{method}")
-        return load_query_metrics(method_dir)
+        method_dir = os.path.join(f"pattern_analyzing/final_{embedding_model}", domain, f"{domain}_{method}")
+        try:
+            return load_query_metrics(method_dir)
+        except FileNotFoundError as e:
+            print(f"Warning: Directory not found: {e}")
+            return defaultdict(dict)
     
-    # For restaurant domain, average across cities
+    # For domains with cities, average across cities
     query_metrics = defaultdict(lambda: defaultdict(list))
     
     for city in cities:
-        method_dir = os.path.join("pattern_analyzing/final_minilm", domain, city, f"{city}_{method}")
+        method_dir = os.path.join(f"pattern_analyzing/final_{embedding_model}", domain, city, f"{city}_{method}")
         try:
             city_metrics = load_query_metrics(method_dir)
             
@@ -51,6 +55,37 @@ def load_city_averaged_metrics(domain, method, cities=None):
                 result[query_id][metric_name] = sum(values) / len(values)
     
     return result
+
+def load_combined_metrics(domain, method, cities=None):
+    """Load and average metrics from both embedding models (E5 and MiniLM)."""
+    # Load metrics from both embedding models
+    minilm_data = load_city_averaged_metrics(domain, method, "minilm", cities)
+    e5_data = load_city_averaged_metrics(domain, method, "e5", cities)
+    
+    # Combine and average metrics from both embedding models
+    combined_data = defaultdict(dict)
+    
+    # Get all query IDs from both datasets
+    all_query_ids = set(minilm_data.keys()) | set(e5_data.keys())
+    
+    for query_id in all_query_ids:
+        minilm_metrics = minilm_data.get(query_id, {})
+        e5_metrics = e5_data.get(query_id, {})
+        
+        # Get all metrics present in either dataset
+        all_metrics = set(minilm_metrics.keys()) | set(e5_metrics.keys())
+        
+        for metric in all_metrics:
+            # Get metric values from both sources, defaulting to 0 if not present
+            minilm_value = minilm_metrics.get(metric, 0)
+            e5_value = e5_metrics.get(metric, 0)
+            
+            # Only include in combined result if the metric exists in both datasets
+            if metric in minilm_metrics and metric in e5_metrics:
+                # Calculate the average
+                combined_data[query_id][metric] = (minilm_value + e5_value) / 2
+    
+    return combined_data, minilm_data, e5_data
 
 def calculate_method_differences(method1_data, method2_data, selected_metrics=None):
     """Calculate average metric difference between two methods for each query."""
@@ -117,18 +152,22 @@ def filter_metrics_by_queries(directory, selected_queries, selected_metrics=None
                     metrics[metric_name] = 0
     return metrics
 
-def filter_and_average_metrics_by_queries(domain, method, selected_queries, cities=None, selected_metrics=None):
-    """Calculate average scores for metrics on selected queries, averaging across cities if needed."""
+def filter_and_average_metrics_by_queries(domain, method, selected_queries, embedding_model, cities=None, selected_metrics=None):
+    """Calculate average scores for metrics on selected queries for a specific embedding model, averaging across cities if needed."""
     if domain not in ['restaurant', 'hotel'] or cities is None:
         # For domains without cities or if no cities specified
-        method_dir = os.path.join("pattern_analyzing/final_minilm", domain, f"{domain}_{method}")
-        return filter_metrics_by_queries(method_dir, selected_queries, selected_metrics)
+        method_dir = os.path.join(f"pattern_analyzing/final_{embedding_model}", domain, f"{domain}_{method}")
+        try:
+            return filter_metrics_by_queries(method_dir, selected_queries, selected_metrics)
+        except FileNotFoundError:
+            print(f"Warning: Directory not found: {method_dir}")
+            return {}
     
     # For domains with multiple cities
     city_metrics = {}
     
     for city in cities:
-        method_dir = os.path.join("pattern_analyzing/final_minilm", domain, city, f"{city}_{method}")
+        method_dir = os.path.join(f"pattern_analyzing/final_{embedding_model}", domain, city, f"{city}_{method}")
         try:
             city_metrics[city] = filter_metrics_by_queries(method_dir, selected_queries, selected_metrics)
         except FileNotFoundError:
@@ -158,31 +197,61 @@ def highlight_max(s):
     is_max = s == s.max()
     return ['font-weight: bold' if v else '' for v in is_max]
 
-def save_as_image(df, output_name="method_comparison_top_queries"):
-    """Save the styled DataFrame as an image with winners highlighted."""
-    fig, ax = plt.subplots(figsize=(12, 6))
-    ax.axis('tight')
-    ax.axis('off')
+def save_as_image(minilm_df, e5_df, output_name="method_comparison_top_queries"):
+    """Save two styled DataFrames as an image with winners highlighted."""
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 12))
     
-    # Prepare cell colors: highlight max in each column
-    cell_colors = []
-    for col in df.columns:
-        max_val = df[col].max()
-        colors = ['lightgreen' if val == max_val else 'white' for val in df[col]]
-        cell_colors.append(colors)
-    cell_colors = np.array(cell_colors).T
+    # Set titles
+    ax1.set_title("MiniLM Results", fontsize=14)
+    ax2.set_title("E5 Results", fontsize=14)
     
-    cell_text = df.round(3).values
+    # Turn off axes
+    ax1.axis('tight')
+    ax1.axis('off')
+    ax2.axis('tight')
+    ax2.axis('off')
     
-    table = ax.table(cellText=cell_text,
-                     colLabels=df.columns,
-                     rowLabels=df.index,
-                     cellLoc='center',
-                     loc='center',
-                     cellColours=cell_colors)
-    table.auto_set_font_size(False)
-    table.set_fontsize(10)
-    table.scale(1.2, 1.2)
+    # Create tables for MiniLM
+    cell_colors1 = []
+    for col in minilm_df.columns:
+        max_val = minilm_df[col].max()
+        colors = ['lightgreen' if val == max_val else 'white' for val in minilm_df[col]]
+        cell_colors1.append(colors)
+    cell_colors1 = np.array(cell_colors1).T
+    
+    cell_text1 = minilm_df.round(3).values
+    
+    table1 = ax1.table(cellText=cell_text1,
+                      colLabels=minilm_df.columns,
+                      rowLabels=minilm_df.index,
+                      cellLoc='center',
+                      loc='center',
+                      cellColours=cell_colors1)
+    table1.auto_set_font_size(False)
+    table1.set_fontsize(10)
+    table1.scale(1.2, 1.2)
+    
+    # Create tables for E5
+    cell_colors2 = []
+    for col in e5_df.columns:
+        max_val = e5_df[col].max()
+        colors = ['lightgreen' if val == max_val else 'white' for val in e5_df[col]]
+        cell_colors2.append(colors)
+    cell_colors2 = np.array(cell_colors2).T
+    
+    cell_text2 = e5_df.round(3).values
+    
+    table2 = ax2.table(cellText=cell_text2,
+                      colLabels=e5_df.columns,
+                      rowLabels=e5_df.index,
+                      cellLoc='center',
+                      loc='center',
+                      cellColours=cell_colors2)
+    table2.auto_set_font_size(False)
+    table2.set_fontsize(10)
+    table2.scale(1.2, 1.2)
+    
+    plt.tight_layout()
     plt.savefig(f"{output_name}.png", bbox_inches='tight', dpi=300)
     plt.close()
 
@@ -228,12 +297,13 @@ def main():
     elif domain == 'hotel':
         cities = ['chicago', 'london', 'montreal', 'nyc']
     
-    # Load data for method1 and method2, averaging across cities if needed
-    method1_data = load_city_averaged_metrics(domain, method1, cities)
-    method2_data = load_city_averaged_metrics(domain, method2, cities)
+    # Load data for method1 and method2, averaging across cities and embedding models
+    method1_combined, method1_minilm, method1_e5 = load_combined_metrics(domain, method1, cities)
+    method2_combined, method2_minilm, method2_e5 = load_combined_metrics(domain, method2, cities)
     
     # Calculate differences between methods for each query using only selected metrics
-    diff_by_query = calculate_method_differences(method1_data, method2_data, selected_metrics)
+    # Use the combined (averaged) data for selecting top queries
+    diff_by_query = calculate_method_differences(method1_combined, method2_combined, selected_metrics)
     
     if not diff_by_query:
         print(f"No common queries found between {method1} and {method2} for {domain} domain")
@@ -247,32 +317,41 @@ def main():
         print(f"{query_id}")
     
     # Calculate metrics for all methods using only the top queries
-    results = {}
+    minilm_results = {}
+    e5_results = {}
     
     for method in methods:
-        # Calculate metrics for all methods using only the top queries, averaging across cities if needed
-        # Always use the allowed metrics
-        results[method] = filter_and_average_metrics_by_queries(domain, method, top_queries, cities)
+        # Calculate metrics for MiniLM embedding model
+        minilm_results[method] = filter_and_average_metrics_by_queries(
+            domain, method, top_queries, "minilm", cities
+        )
+        
+        # Calculate metrics for E5 embedding model
+        e5_results[method] = filter_and_average_metrics_by_queries(
+            domain, method, top_queries, "e5", cities
+        )
     
-    # Create DataFrame and transpose to have methods as rows and metrics as columns
-    df = pd.DataFrame(results).T
+    # Create DataFrames and transpose to have methods as rows and metrics as columns
+    minilm_df = pd.DataFrame(minilm_results).T
+    e5_df = pd.DataFrame(e5_results).T
     
     # Round all values to 3 decimal places
-    df = df.round(3)
+    minilm_df = minilm_df.round(3)
+    e5_df = e5_df.round(3)
     
     # Apply styling to highlight the max in each column
-    styled_df = df.style.apply(highlight_max)
-    
-    # Save as Excel
-    # styled_df.to_excel(f"{output_name}.xlsx", engine="openpyxl")
+    minilm_styled_df = minilm_df.style.apply(highlight_max)
+    e5_styled_df = e5_df.style.apply(highlight_max)
     
     # Save as image with highlighted winners
-    save_as_image(df, output_name)
+    save_as_image(minilm_df, e5_df, output_name)
     
     metric_desc = f" (queries sorted using {', '.join(selected_metrics)})" if selected_metrics else ""
-    print(f"\nResults saved to '{output_name}.xlsx' and '{output_name}.png'")
-    print(f"\nAverage Scores for {domain} domain using top {len(top_queries)} queries where {method1} outperforms {method2}{metric_desc} (winners highlighted):")
-    print(styled_df.to_string())
+    print(f"\nResults saved to '{output_name}.png'")
+    print(f"\nMiniLM Scores for {domain} domain using top {len(top_queries)} queries where {method1} outperforms {method2}{metric_desc} (winners highlighted):")
+    print(minilm_styled_df.to_string())
+    print(f"\nE5 Scores for {domain} domain using top {len(top_queries)} queries where {method1} outperforms {method2}{metric_desc} (winners highlighted):")
+    print(e5_styled_df.to_string())
 
 if __name__ == "__main__":
     main() 
@@ -280,13 +359,13 @@ if __name__ == "__main__":
 '''
 # Examples:
 # Use all metrics:
-python pattern_analyzing/compare_methods_by_query_30.py --domain travel --method1 eqr --method2 q2d --top_n 100
-python pattern_analyzing/compare_methods_by_query_30.py --domain hotel --method1 eqr --method2 q2e --top_n 100
-python pattern_analyzing/compare_methods_by_query_30.py --domain restaurant --method1 eqr --method2 q2e --top_n 100
+python pattern_analyzing/compare_methods_by_query_30_combined.py --domain travel --method1 eqr --method2 q2d --top_n 100
+python pattern_analyzing/compare_methods_by_query_30_combined.py --domain hotel --method1 eqr --method2 q2e --top_n 100
+python pattern_analyzing/compare_methods_by_query_30_combined.py --domain restaurant --method1 eqr --method2 q2e --top_n 100
 
 # Use only specific metrics:
-python pattern_analyzing/compare_methods_by_query_30.py --domain restaurant --method1 eqr --method2 q2e --top_n 100 --metrics map_at10 recall_at10 rprecision
-python pattern_analyzing/compare_methods_by_query_30.py --domain travel --method1 eqr --method2 q2d --top_n 90 --metrics map_at10 recall_at10 map_at30
-python pattern_analyzing/compare_methods_by_query_30.py --domain hotel --method1 eqr --method2 q2e --top_n 100 --metrics map_at10 recall_at10 map_at30
+python pattern_analyzing/compare_methods_by_query_30_combined.py --domain restaurant --method1 eqr --method2 q2e --top_n 100 --metrics map_at10 recall_at10 rprecision
+python pattern_analyzing/compare_methods_by_query_30_combined.py --domain travel --method1 eqr --method2 q2d --top_n 90 --metrics map_at10 recall_at10 map_at30
+python pattern_analyzing/compare_methods_by_query_30_combined.py --domain hotel --method1 eqr --method2 q2e --top_n 100 --metrics map_at10 recall_at10 map_at30
 
 '''

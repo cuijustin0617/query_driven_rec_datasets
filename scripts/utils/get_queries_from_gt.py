@@ -33,5 +33,5 @@ def extract_keys_to_txt(json_file_path, output_txt_path):
 # Example usage
 if __name__ == "__main__":
     json_file_path = "ground_truth/restaurant/phi/ground_truth_apr13_158.json"  # Replace with your JSON file path
-    output_txt_path = "ground_truth/restaurant/phi/wi.txt"   # Replace with your desired output file path
+    output_txt_path = "queries_final/restaurant_apr14_158.txt"   # Replace with your desired output file path
     extract_keys_to_txt(json_file_path, output_txt_path)
