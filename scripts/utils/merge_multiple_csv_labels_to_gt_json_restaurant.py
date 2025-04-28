@@ -5,21 +5,21 @@ import os
 from collections import defaultdict, Counter
 
 # Path definitions
-phi_dir = "per_pair_labeling/datasets/restaurant_apr12/phi"
-new_orl_dir = "per_pair_labeling/datasets/restaurant_apr12/new_orl"
+phi_dir = "per_pair_labeling/datasets/restaurant_apr15/phi"
+new_orl_dir = "per_pair_labeling/datasets/restaurant_apr15/new_orl"
 
 # Get CSV file paths for each part
-phi_csv_part1 = os.path.join(phi_dir, "gemini_labels_apr12_part1.csv")
-phi_csv_part2 = os.path.join(phi_dir, "gemini_labels_apr12_part2.csv")
-phi_csv_part3 = os.path.join(phi_dir, "gemini_labels_apr12_part3.csv")
+phi_csv_part1 = os.path.join(phi_dir, "gemini_labels_apr15_part1.csv")
+phi_csv_part2 = os.path.join(phi_dir, "gemini_labels_apr15_part2.csv")
+phi_csv_part3 = os.path.join(phi_dir, "gemini_labels_apr15_part3.csv")
 
-new_orl_csv_part1 = os.path.join(new_orl_dir, "gemini_labels_apr12_part1.csv")
-new_orl_csv_part2 = os.path.join(new_orl_dir, "gemini_labels_apr12_part2.csv")
-new_orl_csv_part3 = os.path.join(new_orl_dir, "gemini_labels_apr12_part3.csv")
+new_orl_csv_part1 = os.path.join(new_orl_dir, "gemini_labels_apr15_part1.csv")
+new_orl_csv_part2 = os.path.join(new_orl_dir, "gemini_labels_apr15_part2.csv")
+new_orl_csv_part3 = os.path.join(new_orl_dir, "gemini_labels_apr15_part3.csv")
 
 # Thresholds
 MIN_THRESHOLD = 0.005  # 0.5%
-MAX_THRESHOLD = 0.4    # 40%
+MAX_THRESHOLD = 0.35    # 40%
 
 # Required row counts for each city
 PHI_REQUIRED_ROWS = 637
@@ -62,10 +62,12 @@ def process_city_data(csv_files, city_name, required_row_count):
         }
     
     # Print detailed stats
+    total_queries = len(query_stats)
     total_qualified = sum(1 for stats in query_stats.values() if stats['qualified'])
     wrong_row_count = sum(1 for stats in query_stats.values() if not stats['has_required_rows'])
     rel3_out_of_range = sum(1 for stats in query_stats.values() if not stats['rel3_in_range'])
     
+    print(f"Total queries for {city_name}: {total_queries}")
     print(f"Total for {city_name}: {total_qualified} qualified queries")
     print(f"  - {wrong_row_count} queries disqualified due to wrong row count (expected {required_row_count})")
     print(f"  - {rel3_out_of_range} queries disqualified due to relevance score=3 percentage out of range")

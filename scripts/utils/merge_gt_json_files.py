@@ -29,8 +29,12 @@ def merge_json_files(input_path1, input_path2, output_path):
 
 if __name__ == "__main__":
     # Define input and output paths
-    input_path1 = 'ground_truth/restaurant/phi/ground_truth_apr10_final_123.json'  # Change this to your first JSON file path
-    input_path2 = 'ground_truth/restaurant/phi/ground_truth_apr12_35.json'  # Change this to your second JSON file path
-    output_path = 'ground_truth/restaurant/phi/ground_truth_apr13_158.json'   # Change this to your desired output file path
+    input_path1 = 'ground_truth/restaurant/nor/ground_truth_apr13_158.json'  # Change this to your first JSON file path
+    input_path2 = 'ground_truth/restaurant/nor/ground_truth_apr15_49.json'  # Change this to your second JSON file path
+    output_path = 'ground_truth/restaurant/nor/ground_truth_apr15_207.json'   # Change this to your desired output file path
+    
+    # input_path1 = 'ground_truth/hotel/chicago/ground_truth_apr15_124.json'  # Change this to your first JSON file path
+    # input_path2 = 'ground_truth/hotel/chicago/ground_truth_final_143.json'  # Change this to your second JSON file path
+    # output_path = 'ground_truth/hotel/chicago/ground_truth_full_267.json'   # Change this to your desired output file path
     
     merge_json_files(input_path1, input_path2, output_path)

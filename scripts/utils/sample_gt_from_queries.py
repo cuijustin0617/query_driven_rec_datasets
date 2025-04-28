@@ -57,9 +57,9 @@ def sample_gt_from_queries(gt_path: str, query_path: str, output_path: str) -> N
 
 def main():
     # Define paths as variables that can be easily changed
-    gt_path = "ground_truth/hotel/chicago/ground_truth_final_143.json"
-    query_path = "good_results/selected/hotel/winning_hotel_100.txt"
-    output_path = "ground_truth/hotel/chicago/winning_hotel_100.json"
+    gt_path = "ground_truth/restaurant/phi/ground_truth_apr15_207.json"  #### TO CHANGE ####
+    query_path = "FINAL_RESULTS_APR15/restaurant/restaurant_apr15_100.txt"  #### TO CHANGE ####
+    output_path = "FINAL_RESULTS_APR15/restaurant/gt_phi_100.json"  #### TO CHANGE ####
     
     # Call the function with the defined paths
     sample_gt_from_queries(gt_path, query_path, output_path)

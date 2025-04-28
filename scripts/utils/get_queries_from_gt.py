@@ -21,7 +21,7 @@ def extract_keys_to_txt(json_file_path, output_txt_path):
             for key in keys:
                 txt_file.write(f"{key}\n")
 
-        print(f"Successfully wrote keys to {output_txt_path}")
+        print(f"Successfully wrote {len(keys)} keys to {output_txt_path}")
 
     except FileNotFoundError:
         print(f"Error: The file {json_file_path} does not exist.")
@@ -32,6 +32,7 @@ def extract_keys_to_txt(json_file_path, output_txt_path):
 
 # Example usage
 if __name__ == "__main__":
-    json_file_path = "ground_truth/restaurant/phi/ground_truth_apr13_158.json"  # Replace with your JSON file path
-    output_txt_path = "queries_final/restaurant_apr14_158.txt"   # Replace with your desired output file path
+    # json_file_path = "ground_truth/restaurant/phi/ground_truth_apr15_50.json"  # Replace with your JSON file path
+    json_file_path = "ground_truth/hotel/chicago/ground_truth_full_267.json"  # Replace with your JSON file path
+    output_txt_path = "queries_final/restaurant_apr15_50.txt"   # Replace with your desired output file path
     extract_keys_to_txt(json_file_path, output_txt_path)

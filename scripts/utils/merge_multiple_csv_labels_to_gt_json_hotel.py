@@ -5,20 +5,27 @@ import os
 from collections import defaultdict, Counter
 
 # Path definitions
-nyc_dir = "per_pair_labeling/datasets/hotel_apr11/nyc"   #### TO CHANGE ####
-montreal_dir = "per_pair_labeling/datasets/hotel_apr11/montreal"  #### TO CHANGE ####
-london_dir = "per_pair_labeling/datasets/hotel_apr11/london"  #### TO CHANGE ####
-chicago_dir = "per_pair_labeling/datasets/hotel_apr11/chicago"  #### TO CHANGE ####
+nyc_dir = "per_pair_labeling/datasets/hotel_apr15/nyc"   #### TO CHANGE ####
+montreal_dir = "per_pair_labeling/datasets/hotel_apr15/montreal"  #### TO CHANGE ####
+london_dir = "per_pair_labeling/datasets/hotel_apr15/london"  #### TO CHANGE ####
+chicago_dir = "per_pair_labeling/datasets/hotel_apr15/chicago"  #### TO CHANGE ####
 
 # Get CSV file paths
-nyc_csv = os.path.join(nyc_dir, f"gemini_labels_apr11.csv")    #### TO CHANGE ####
-montreal_csv = os.path.join(montreal_dir, f"gemini_labels_apr11.csv")  #### TO CHANGE ####
-london_csv = os.path.join(london_dir, f"gemini_labels_apr11.csv")  #### TO CHANGE ####
-chicago_csv = os.path.join(chicago_dir, f"gemini_labels_apr11.csv")  #### TO CHANGE ####
+# NYC and London have three parts each
+nyc_csv_part1 = os.path.join(nyc_dir, f"gemini_labels_apr15_part1.csv")
+nyc_csv_part2 = os.path.join(nyc_dir, f"gemini_labels_apr15_part2.csv")
+nyc_csv_part3 = os.path.join(nyc_dir, f"gemini_labels_apr15_part3.csv")
+# Montreal and Chicago have only one part
+montreal_csv = os.path.join(montreal_dir, f"gemini_labels_apr15.csv")
+# London has three parts
+london_csv_part1 = os.path.join(london_dir, f"gemini_labels_apr15_part1.csv")
+london_csv_part2 = os.path.join(london_dir, f"gemini_labels_apr15_part2.csv")
+london_csv_part3 = os.path.join(london_dir, f"gemini_labels_apr15_part3.csv")
+chicago_csv = os.path.join(chicago_dir, f"gemini_labels_apr15.csv")
 
 # Thresholds
 MIN_THRESHOLD = 0.005  # 1.5%  #### TO CHANGE ####
-MAX_THRESHOLD = 0.35    # 30%  #### TO CHANGE ####
+MAX_THRESHOLD = 0.33    # 30%  #### TO CHANGE ####
 
 # Required row counts for each city
 NYC_REQUIRED_ROWS = 260  #### TO CHANGE ####
@@ -26,10 +33,17 @@ MONTREAL_REQUIRED_ROWS = 64  #### TO CHANGE ####
 LONDON_REQUIRED_ROWS = 266  #### TO CHANGE ####
 CHICAGO_REQUIRED_ROWS = 74  #### TO CHANGE ####
 
-def process_city_data(csv_file, city_name, required_row_count):
+def process_city_data(csv_files, city_name, required_row_count):
     """Process data for one city and return query statistics"""
-    # Load data for the city
-    df = pd.read_csv(csv_file)
+    # Load data for the city - handling multiple files if necessary
+    if isinstance(csv_files, list):
+        # Load and concatenate multiple dataframes
+        dfs = [pd.read_csv(csv_file) for csv_file in csv_files]
+        df = pd.concat(dfs, ignore_index=True)
+    else:
+        # Single file case
+        df = pd.read_csv(csv_files)
+        
     print(f"Loaded {city_name}: {len(df)} rows")
     
     # Count total rows and relevance=3 rows per query
@@ -53,11 +67,13 @@ def process_city_data(csv_file, city_name, required_row_count):
         }
     
     # Print detailed stats
+    total_queries = len(query_stats)
     total_qualified = sum(1 for stats in query_stats.values() if stats['qualified'])
     wrong_row_count = sum(1 for stats in query_stats.values() if not stats['has_required_rows'])
     rel3_out_of_range = sum(1 for stats in query_stats.values() if not stats['rel3_in_range'])
     
-    print(f"Total for {city_name}: {total_qualified} qualified queries")
+    print(f"Total queries for {city_name}: {total_queries}")
+    print(f"  - {total_qualified} qualified queries")
     print(f"  - {wrong_row_count} queries disqualified due to wrong row count (expected {required_row_count})")
     print(f"  - {rel3_out_of_range} queries disqualified due to relevance score=3 percentage out of range")
     
@@ -65,11 +81,11 @@ def process_city_data(csv_file, city_name, required_row_count):
 
 # Process all cities
 print("Processing NYC data...")
-nyc_stats, nyc_df = process_city_data(nyc_csv, "NYC", NYC_REQUIRED_ROWS)
+nyc_stats, nyc_df = process_city_data([nyc_csv_part1, nyc_csv_part2, nyc_csv_part3], "NYC", NYC_REQUIRED_ROWS)
 print("\nProcessing Montreal data...")
 montreal_stats, montreal_df = process_city_data(montreal_csv, "Montreal", MONTREAL_REQUIRED_ROWS)
 print("\nProcessing London data...")
-london_stats, london_df = process_city_data(london_csv, "London", LONDON_REQUIRED_ROWS)
+london_stats, london_df = process_city_data([london_csv_part1, london_csv_part2, london_csv_part3], "London", LONDON_REQUIRED_ROWS)
 print("\nProcessing Chicago data...")
 chicago_stats, chicago_df = process_city_data(chicago_csv, "Chicago", CHICAGO_REQUIRED_ROWS)
 

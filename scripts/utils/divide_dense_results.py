@@ -3,10 +3,10 @@ import math
 import os
 
 # Input file path
-input_file = "data/dense_results/restaurant/phi/dense_result_apr12.json"  ##### TO CHANGE #####
+input_file = "data/dense_results/restaurant/new_orl/dense_result_apr15.json"  ##### TO CHANGE #####
 
 # Output directory
-output_dir = "data/dense_results/restaurant/phi"  ##### TO CHANGE #####
+output_dir = "data/dense_results/restaurant/new_orl"  ##### TO CHANGE #####
 os.makedirs(output_dir, exist_ok=True)
 
 # Read the input JSON file
@@ -34,7 +34,7 @@ for i in range(3):    ##### TO CHANGE #####
 
 # Write each part to a separate JSON file
 for i, part in enumerate(parts):
-    output_file = os.path.join(output_dir, f"dense_result_apr12_part{i+1}.json")  ##### TO CHANGE #####
+    output_file = os.path.join(output_dir, f"dense_result_apr15_part{i+1}.json")  ##### TO CHANGE #####
     with open(output_file, 'w') as f:
         json.dump(part, f, indent=4)
 

@@ -39,10 +39,10 @@ class PipelineConfig:
     def __init__(
         self,
         domain: str = "restaurant",     ##### TO CHANGE #####
-        input_json_path: str = "data/dense_results/restaurant/phi/dense_result_apr12_part3.json",  ##### TO CHANGE #####
-        output_dir: str = "per_pair_labeling/datasets/restaurant_apr12/phi",  ##### TO CHANGE #####
-        output_filename: str = "gemini_labels_apr12_part3.csv",  ##### TO CHANGE #####
-        disabled_queries_filename: str = "disabled_queries_apr12_part3.json"  ##### TO CHANGE #####
+        input_json_path: str = "data/dense_results/restaurant/phi/dense_result_apr15_part1.json",  ##### TO CHANGE #####
+        output_dir: str = "per_pair_labeling/datasets/restaurant_apr15/phi",  ##### TO CHANGE #####
+        output_filename: str = "gemini_labels_apr15_part1.csv",  ##### TO CHANGE #####
+        disabled_queries_filename: str = "disabled_queries_apr15_part1.json"  ##### TO CHANGE #####
     ):
         # Validate domain
         if domain not in DOMAIN_MAPPINGS:
@@ -63,11 +63,11 @@ class PipelineConfig:
         
         # Parameters for query disabling - too many high scores (easy query)
         self.max_labels_threshold = 100  # Number of labels to check before disabling a query     ##### TO CHANGE #####
-        self.max_high_score_threshold = 90  # Max number of '3' scores before disabling a query     ##### TO CHANGE #####
+        self.max_high_score_threshold = 85  # Max number of '3' scores before disabling a query     ##### TO CHANGE #####
         
         # Parameters for query disabling - too few high scores (difficult query)
-        self.min_labels_threshold = 100  # Check for too few high scores at this threshold     ##### TO CHANGE #####
-        self.min_high_score_threshold = 1  # Min number of '3' scores required at min_labels_threshold     ##### TO CHANGE #####
+        self.min_labels_threshold = 80  # Check for too few high scores at this threshold     ##### TO CHANGE #####
+        self.min_high_score_threshold = 2  # Min number of '3' scores required at min_labels_threshold     ##### TO CHANGE #####
     
     def get_csv_headers(self) -> list:
         """Get CSV headers based on the domain."""

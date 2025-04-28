@@ -552,7 +552,7 @@ if __name__ == "__main__":
 
 # Examples:
 # Use all metrics with default equal weights:
-python pattern_analyzing/compare_methods_by_query_30_combined_1tomany.py --domain travel --method1 eqr --compare_methods q2d q2e --top_n 100
+python pattern_analyzing/compare_methods_by_query_30_combined_1tomany.py --domain restaurant --method1 eqr --compare_methods q2e --top_n 100
 
 # Use all metrics with custom weights:
 python pattern_analyzing/compare_methods_by_query_30_combined_1tomany.py --domain hotel --method1 eqr --compare_methods q2e q2d --top_n 100 --weights 2.0 1.0 1.5 1.0 1.0 1.0 1.0 1.0 1.0 1.0
@@ -571,5 +571,8 @@ python pattern_analyzing/compare_methods_by_query_30_combined_1tomany.py --domai
 python pattern_analyzing/compare_methods_by_query_30_combined_1tomany.py --domain travel --method1 eqr --compare_methods q2e q2d --top_n 110 --weights 7.0 1.0 8.0 3.0 1.0 1.0 0.0 0.0 0.0 1.0
 
 python pattern_analyzing/compare_methods_by_query_30_combined_1tomany.py --domain travel --method1 eqr --compare_methods q2e q2d --top_n 105 --weights 7.0 15.0 0.0 0.0 1.0 1.0 0.0 2.0 0.0 0.0 --opponent_weights 1.0 2.0
+
+
+python pattern_analyzing/compare_methods_by_query_30_combined_1tomany.py --domain restaurant --method1 eqr --compare_methods q2e --top_n 100 --weights 9.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0
 
 ''' 
