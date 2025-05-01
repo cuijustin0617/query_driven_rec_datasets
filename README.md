@@ -1,129 +1,43 @@
 # Query-Driven Recommendation Datasets
-This repo contains 4 pipelines for synthetically generating query-driven recommendation datasets.
 
-Summary of Pipeline Differences
-| Pipeline | Processing Unit | LLM Calls | Evaluation Strategy | Output Format |
-|----------|----------------|-----------|---------------------|---------------|
-| Per Document | 1 document at a time | 1 per document| Entire document evaluated against all queries | Binary (True/False) |
-| Per Passage | Batches of passages | Multiple per document for each query| Passage-level scores aggregated to document score | Numerical scores aggregated |
-| Per Query | 2-stage process | 1 per document for summaries + 1 per query for judgments | Two-stage: summarize then judge | Relevance scores (0-3) |
-| Per Pair | 1 document at a time | 1 per document-query pair | Full document description against query | Relevance scores (0-3) |
+ We provide three query-driven recommendation datasets designed to rigorously evaluate systems under challenging conditions where items are described through multiple diverse textual sources. Each dataset contains 100 natural language queries, ground truth relevance labels, and original corpus of items for reference.
+ 
+ This repository addresses the lack of benchmark datasets for evaluating natural language query-driven recommendation systems where user intent is implicitly expressed through broad or indirect queries.
 
+## Datasets
 
-## Per Document Labeling Pipeline
-This pipeline provides a more sophisticated approach to generating relevance judgments by processing documents through a multi-step pipeline using an LLM.
+| Dataset | Cities/Categories | Corpus Size | Queries |
+|---------|------------------|-------------|---------|
+| Yelp_Restaurant | New Orleans (nor), Philadelphia (phi) | 1,152 restaurants (nor: 515, phi: 637) | 100 |
+| TripAdvisor_Hotel | New York City, Chicago, London, Montreal | 586 hotels (nyc: 182, chicago: 74, london: 266, montreal: 64) | 100 |
+| Traveldest | /| 775 cities | 100 |
 
+### Yelp_Restaurant
+A dataset of restaurant recommendations based on Yelp reviews:
+- 100 natural language queries in `queries_restaurant.txt`
+- Ground truth files:
+  - New Orleans: `gt_nor.json`
+  - Philadelphia: `gt_phi.json`
+- Corpus of 1,152 restaurants organized by city (nor, phi)
 
-### Pipeline Components
+### TripAdvisor_Hotel
+A dataset of hotel recommendations based on TripAdvisor reviews:
+- 100 natural language queries in `queries_hotel.txt`
+- Ground truth files for each city:
+  - New York City: `gt_nyc.json.txt`
+  - Chicago: `gt_chicago.json.txt`
+  - London: `gt_london.json.txt`
+  - Montreal: `gt_montreal.json.txt`
+- Corpus of 586 hotels organized by city (nyc, chicago, london, montreal)
 
-1. **DocumentSummarizer**: Given a query, generates query-specific summaries for each restaurant document
+### Traveldest
+A dataset of travel destination recommendations based on WikiVoyage pages:
+- 100 natural language queries in `queries_travel.txt`
+- Ground truth for various cities in `gt_cities.json`
+- Corpus of 774 cities with detailed descriptions from WikiVoyage
 
-2. **RelevanceJudge**: Determines which restaurants are relevant to a specific query
+## Labeling Pipeline
 
-3. **RelevancePipeline**: Orchestrates the entire process from data loading to ground truth generation
+The repository also includes the complete labeling pipeline used to create these datasets. The pipeline uses Large Language Models to generate binary relevance labels for query-document pairs.
 
-### Setup
-
-1. **Install the package in development mode**:
-
-```bash
-pip install -e .
-```
-
-2. **Set up environment variables**:
-
-Create a `.env` file in the root directory with the required API keys:
-```
-# GEMINI_API_KEY=your_gemini_api_key_here
-# OPENAI_API_KEY=your_openai_key_here
-# DEEPSEEK_API_KEY=your_deepseek_key_here
-```
-Include whichever API key corresponds to the LLM provider you've configured in the `config.py` file.
-
-
-3. **Configure the settings**:
-
-Edit the `per_query_labeling/config.py` file to set up your:
-
-- File paths for queries and documents
-
-- Output directories
-
-- LLM provider and model settings
-
-### Running the Pipeline
-
-Run the main script to execute the pipeline:
-```python -m per_query_labeling.main```
-
-
-This pipeline:
-
-- Reads queries and restaurant documents
-
-- Generates restaurant summaries with respect to each query
-
-- Determines relevant items for each query based on all summaries at once
-
-- Creates and saves a ground truth JSON file
-
-
-### Configuration
-
-Edit the `per_query_labeling/config.py` file to customize:
-
-- File paths for queries, documents, and output directories
-
-- LLM provider and model settings
-
-- API keys and retry settings
-
-The output will be saved to the configured output directory, with separate folders for summaries, relevance judgments, and a final ground truth JSON file.
-
-
-## Per Query Labeling Pipeline
-
-### 1. Generate Relevance Labels
-
-**Prerequisites**:
-   - Restaurant documents in a folder: e.g.`Philadelphia/docs_2k/*.txt`
-   - Query file at `queries.txt` -- one query per row
-   - Output directory created at a folder e.g. `Philadelphia/judgements_multi_2k/`
-
-Run the label generation script to create relevance judgments for each restaurant:
-
-```bash
-python generate_all_labels.py
-```
-
-This script performs the following operations:
-- Processes each restaurant document against all queries
-- Uses GPT-4o mini to determine query relevance
-- Generates CSV files containing True/False judgments
-- Skips already processed restaurants
-- Stores results in the specified output folder (e.g., 'Philadelphia/judgements_multi_2k/')
-
-### 2. Generate Ground Truth JSON
-
-After generating all relevance labels, create the consolidated ground truth JSON file:
-
-```bash
-python generate_json.py
-```
-
-This script will:
-- Process all CSV files from the judgments folder
-- Create a JSON file mapping queries to relevant restaurants
-- Output the results to a specified JSON file (e.g., 'Philadelphia/ground_truth_cuisine_2k.json')
-
-## Output Format
-
-The final ground truth JSON file will have the following structure:
-
-```json
-{
-    "query1": ["restaurant1", "restaurant2", ...],
-    "query2": ["restaurant3", "restaurant4", ...],
-    ...
-}
-```
+For detailed instructions on how to use the labeling pipeline, including configuration options, input formats, and output explanations, please refer to the dedicated `README.md` in the `labelling` folder. 

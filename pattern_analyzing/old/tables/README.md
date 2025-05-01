@@ -1,1 +1,0 @@
-python pattern_analyzing/colored_table.py --eval_metrics map_at10 --top_n 50 --output pattern_analyzing/tables/restaurant/map_10.png --domain restaurant
