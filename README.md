@@ -1,6 +1,12 @@
 # Query-Driven Recommendation Datasets
 
-We provide three query-driven recommendation datasets designed to evaluate systems under challenging conditions where 1)user intent is implicitly expressed through broad or indirect queries 2)items are described through multiple diverse textual sources. Each dataset contains 100 natural language queries, ground truth relevance labels, and original corpus of items for reference.
+We provide three query-driven recommendation datasets designed to evaluate systems under challenging conditions where 
+  
+1. user intent is implicitly expressed through broad or indirect queries 
+  
+2. items are described through multiple diverse textual sources. 
+  
+Each dataset contains 100 natural language queries, ground truth relevance labels, and original corpus of items for reference.
 
 
 ## Datasets
@@ -33,10 +39,10 @@ A dataset of hotel recommendations based on TripAdvisor reviews:
 A dataset of travel destination recommendations based on WikiVoyage pages:
 - 100 natural language queries in `queries_travel.txt`
 - Ground truth for various cities in `gt_cities.json`
-- Corpus of 774 cities with detailed descriptions from WikiVoyage
+- Corpus of 775 cities with detailed descriptions from WikiVoyage
 
 ## Labeling Pipeline
 
 The repository also includes the complete labeling pipeline used to create these datasets. The pipeline uses Large Language Models to generate binary relevance labels for query-document pairs.
 
-For detailed instructions on how to use the labeling pipeline, including configuration options, input formats, and output explanations, please refer to the dedicated `README.md` in the `labelling` folder. 
+For detailed instructions on how to use the labeling pipeline, including configuration options, input formats, and output explanations, please **refer to the dedicated `README.md`** in the `labelling` folder. 
