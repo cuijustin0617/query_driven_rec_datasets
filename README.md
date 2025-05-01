@@ -1,8 +1,7 @@
 # Query-Driven Recommendation Datasets
 
- We provide three query-driven recommendation datasets designed to evaluate systems under challenging conditions where items are described through multiple diverse textual sources. Each dataset contains 100 natural language queries, ground truth relevance labels, and original corpus of items for reference.
- 
- This repository addresses the lack of benchmark datasets for evaluating natural language query-driven recommendation systems where user intent is implicitly expressed through broad or indirect queries.
+We provide three query-driven recommendation datasets designed to evaluate systems under challenging conditions where 1)user intent is implicitly expressed through broad or indirect queries 2)items are described through multiple diverse textual sources. Each dataset contains 100 natural language queries, ground truth relevance labels, and original corpus of items for reference.
+
 
 ## Datasets
 
