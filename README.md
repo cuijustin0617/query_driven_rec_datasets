@@ -24,10 +24,10 @@ A dataset of restaurant recommendations based on Yelp reviews:
 A dataset of hotel recommendations based on TripAdvisor reviews:
 - 100 natural language queries in `queries_hotel.txt`
 - Ground truth files for each city:
-  - New York City: `gt_nyc.json.txt`
-  - Chicago: `gt_chicago.json.txt`
-  - London: `gt_london.json.txt`
-  - Montreal: `gt_montreal.json.txt`
+  - New York City: `gt_nyc.json`
+  - Chicago: `gt_chicago.json`
+  - London: `gt_london.json`
+  - Montreal: `gt_montreal.json`
 - Corpus of 586 hotels organized by city (nyc, chicago, london, montreal)
 
 ### Traveldest
