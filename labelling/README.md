@@ -1,4 +1,4 @@
-# Binary Relevance Labeling System
+# Query-Document Relevance Labeling Pipeline
 
 This system generates binary relevance labels (True/False) for query-document pairs using LLMs. It's designed to be modular, configurable, and easy to use across different domains (cities, restaurants, hotels).
 
