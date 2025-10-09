@@ -1,4 +1,10 @@
+<div align="center">
+  
 # Query-Driven Recommendation Datasets
+
+[![arXiv](https://img.shields.io/badge/arXiv-B31B1B?logo=arxiv&logoColor=fff&style=flat)](https://www.arxiv.org/pdf/2510.02656) [![Hugging Face Dataset](https://img.shields.io/badge/Hugging%20Face-FFD400?logo=huggingface&logoColor=fff&style=flat)](https://huggingface.co/datasets/cuijustin0617/NLRec)
+
+</div>
 
 We provide three query-driven recommendation datasets designed to evaluate systems under challenging conditions where 
   
@@ -7,6 +13,7 @@ We provide three query-driven recommendation datasets designed to evaluate syste
 2. items are described through multiple diverse textual sources. 
   
 Each dataset contains 100 natural language queries, ground truth relevance labels, and original corpus of items for reference.
+
 
 
 ## Datasets
